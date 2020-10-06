@@ -38,7 +38,7 @@ if __name__ == '__main__':
     show_image(img_gray, "Original Image", save_image=save_image, use_matplotlib=matplotlib_plotting)
 
     # 1. Blur Image
-    sigma = 3  # Change this value
+    sigma = 1  # Change this value
     img_blur = blur_gauss(img_gray, sigma)
     show_image(img_blur, "Blurred Image", save_image=save_image, use_matplotlib=matplotlib_plotting)
 

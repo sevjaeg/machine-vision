@@ -3,8 +3,8 @@
 
 """ Automatic hysteresis thresholding
 
-Author: FILL IN
-MatrNr: FILL IN
+Author: Severin Jäger
+MatrNr: 01613004
 """
 
 import cv2

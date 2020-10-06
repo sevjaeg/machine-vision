@@ -3,8 +3,8 @@
 
 """ Edge detection with the Sobel filter
 
-Author: FILL IN
-MatrNr: FILL IN
+Author: Severin Jäger
+MatrNr: 01613004
 """
 
 import cv2
@@ -21,11 +21,16 @@ def sobel(img: np.array) -> (np.array, np.array):
     :rtype: (np.array, np.array)
     """
     ######################################################
-    # Write your own code here
-    gradient = img.copy()     # Replace this line
-    orientation = img.copy()  # Replace this line
+    kernelX = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]])
+    kernelY = np.transpose(kernelX)
 
+    print("Applying Sobel filter")
 
+    g_x = cv2.filter2D(img, -1, kernelX)
+    g_y = cv2.filter2D(img, -1, kernelY)
+
+    gradient = np.sqrt(np.square(g_x), np.square(g_y))
+    orientation = np.arctan2(g_y, g_x)
 
     ######################################################
     return gradient, orientation
