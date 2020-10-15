@@ -9,7 +9,6 @@ MatrNr: 01613004
 
 import cv2
 import numpy as np
-from helper_functions import convolve2d
 
 
 def blur_gauss(img: np.array, sigma: float) -> np.array:
@@ -25,17 +24,25 @@ def blur_gauss(img: np.array, sigma: float) -> np.array:
     :rtype: np.array with shape (height, width) with dtype = np.float32 and values in the range [0.,1.]
     """
     ######################################################
-    # TODO improver performance
-    kernel_1d = cv2.getGaussianKernel(3, sigma)
-    kernel = np.matmul(kernel_1d, np.transpose(kernel_1d))
+
+    kernel_width = 2 * round(3 * sigma) + 1
+
+    kernel = np.zeros(shape=(kernel_width, kernel_width))
+    for i, row in enumerate(kernel):
+        x = i - np.floor(kernel_width / 2)
+        for j, cell in enumerate(row):
+            y = j - np.floor(kernel_width / 2)
+            kernel[i, j] = 1 / (2 * np.pi * np.power(sigma, 2)) * \
+                np.exp(-(np.power(x, 2) + np.power(y, 2)) / (2 * np.power(sigma, 2)))
+
     print("Applying Gauß filter with kernel")
     print(kernel)
-    #img_blur = convolve2d(img, kernel)
 
-    img_blur = cv2.filter2D(img, -1, kernel)
+    # TODO exact normalization?
+    print(np.sum(kernel.flatten()))
 
-    # TODO compare performance to reference gauß implementation
-    # img_blur = cv2.GaussianBlur(img, (3, 3), sigma)
+    # TODO border type
+    img_blur = cv2.filter2D(img, -1, kernel, borderType=cv2.BORDER_REPLICATE)
 
     ######################################################
     return img_blur

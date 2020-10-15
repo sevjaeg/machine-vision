@@ -15,43 +15,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def convolve2d(img: np.array, kernel: np.array):
-    """
-
-    :param img:
-    :param kernel
-    :return:
-    """
-
-    kernel_size = kernel.shape[0]
-    for x, row in enumerate(img, start=0):
-        for y, pixel in enumerate(row, start=0):
-            if not is_part_of_edge(img, x, y):
-                for i, row_kernel in enumerate(kernel):
-                    i = int((i - (kernel_size - 1) / 2))
-                    x_eff = x+i
-                    for j, factor in enumerate(row_kernel):
-                        j = int((j-(kernel_size-1)/2))
-                        y_eff = y+j
-                        img[x, y] += factor * img[x_eff, y_eff]
-                img[x, y] -= pixel
-            else:
-                img[x, y] = 1
-    return img
-
-
-def is_part_of_edge(img: np.array, x: int, y: int):
-    """
-
-    :param img:
-    :param x:
-    :param y:
-    :return:
-    """
-    (size_x, size_y) = img.shape
-    return (x == 0 or x == size_x-1) or (y == 0 or y == size_y-1)
-
-
 def show_image(img: np.array, title: str, save_image: bool = False, use_matplotlib: bool = False) -> None:
     """ Plot an image with either OpenCV or Matplotlib.
 

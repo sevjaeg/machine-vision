@@ -25,13 +25,15 @@ from sobel import sobel
 if __name__ == '__main__':
 
     # Define behavior of the show_image function. You can change these variables if necessary
-    save_image = False
+    save_image = True
     matplotlib_plotting = False
 
+    np.set_printoptions(precision=5, suppress=True)
 
     # Read image
     current_path = Path(__file__).parent
-    img_gray = cv2.imread(str(current_path.joinpath("image/rubens.jpg")), cv2.IMREAD_GRAYSCALE)
+    img_gray = cv2.imread(str(current_path.joinpath("image/circle.jpg")), cv2.IMREAD_GRAYSCALE)
+
 
     # Before we start working with the image, we convert it from uint8 with range [0,255] to float32 with range [0,1]
     img_gray = img_gray.astype(np.float32) / 255.
@@ -54,7 +56,7 @@ if __name__ == '__main__':
     edges = non_max(gradients, orientations)
 
     # 4. Hysteresis Thresholding
-    hyst_method_auto = True
+    hyst_method_auto = False
 
     if hyst_method_auto:
         canny_edges = hyst_thresh_auto(edges, 0.7, 0.3)
