@@ -84,7 +84,7 @@ if __name__ == '__main__':
     hyst_method_auto = True
 
     if hyst_method_auto:
-        canny_edges = hyst_thresh_auto(edges, 0.5, 0.2)
+        canny_edges = hyst_thresh_auto(edges, 0.25, 0.1)
     else:
         canny_edges = hyst_thresh(edges, 0.3, 0.7)
 

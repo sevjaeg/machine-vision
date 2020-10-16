@@ -34,6 +34,7 @@ def non_max(gradients: np.array, orientations: np.array) -> np.array:
     # TODO treat border
 
     # Sectors (gradient direction)
+    # note x is downwards and y to the right in the displayed image
     # A: 0° to 45° and -180° to -135°
     # B: 45° to 90° and -135° to -90°
     # C: 90° to 135° and -90° to -45°
@@ -47,6 +48,8 @@ def non_max(gradients: np.array, orientations: np.array) -> np.array:
     in_sector_d = np.logical_or(orientations >= 3*np.pi/4,
                                 np.logical_and(orientations >= -np.pi/4, orientations < 0))
 
+    # Interpolation formula from lecture slides and
+    # http://www.sci.utah.edu/~gerig/CS6640-F2012/Materials/Canny-Gerig-Slides-updated.pdf
     d_a = gradients.copy()
     d11_a = np.roll(d_a, axis=(0, 1), shift=(-1, -1))  # D(x+1,y+1)
     d12_a = np.roll(d_a, axis=0, shift=-1)  # D(x+1,y)

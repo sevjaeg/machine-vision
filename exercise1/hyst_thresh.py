@@ -33,14 +33,16 @@ def hyst_thresh(edges_in: np.array, low: float, high: float) -> np.array:
     print("Applying hysteresis with t1 = {:.2f} and t2 = {:.2f}".format(low, high))
 
     edges = edges_in/np.max(edges_in)  # normalize
-    edges = np.where(edges >= low, edges, 0)
+    edges = np.where(edges >= low, edges, 0)  # get rid of elements below the lower threshold
 
+    # returns the number of connected components and an image with the connected components numbered
     (N, connected_edges) = cv2.connectedComponents((edges*255).astype(np.uint8), connectivity=8)
 
+    # TODO optimize
     bitwise_img = np.zeros(edges.shape)
     for i in range(1, N):
         image_i = np.where(connected_edges == i, edges, 0)
-        if np.max(image_i) >= high:
+        if (image_i >= high).any():
             bitwise_img += image_i
 
     bitwise_img = np.where(bitwise_img > 0, 1, 0).astype(np.float32)

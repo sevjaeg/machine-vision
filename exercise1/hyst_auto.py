@@ -35,6 +35,7 @@ def hyst_thresh_auto(edges_in: np.array, low_prop: float, high_prop: float) -> n
     ######################################################
     print("Calculating hysteresis thresholds")
 
+    # sort all non-zero values in an array
     pixels = np.sort(edges_in.flatten())
     pixels = pixels[pixels != 0]
     low = pixels[round((1-low_prop)*len(pixels))]
