@@ -32,65 +32,70 @@ def non_max(gradients: np.array, orientations: np.array) -> np.array:
     n_y = np.absolute(np.sin(orientations))
 
     # TODO treat border
-    # TODO clean up
 
-    not_shifted = np.logical_or(np.logical_and(orientations >= 0, orientations < np.pi/2), orientations < - np.pi/2)
+    # Sectors (gradient direction)
+    # A: 0° to 45° and -180° to -135°
+    # B: 45° to 90° and -135° to -90°
+    # C: 90° to 135° and -90° to -45°
+    # D: 135° to 180° and -45° to 0°
+    in_sector_a = np.logical_or(np.logical_and(orientations >= 0, orientations <= np.pi/4),
+                                orientations <= -3*np.pi/4)
+    in_sector_b = np.logical_or(np.logical_and(orientations >= np.pi/4, orientations <= np.pi/2),
+                                np.logical_and(orientations >= -3*np.pi/4, orientations <= -np.pi/2))
+    in_sector_c = np.logical_or(np.logical_and(orientations >= np.pi/2, orientations <= 3*np.pi/4),
+                                np.logical_and(orientations >= -np.pi/2, orientations <= -np.pi/4))
+    in_sector_d = np.logical_or(orientations >= 3*np.pi/4,
+                                np.logical_and(orientations >= -np.pi/4, orientations <= 0))
 
-    d = gradients.copy()
-    d11 = np.roll(d, axis=0, shift=-1)  #D (x+1,y+1)
-    # d11[d11.shape[0]-1, :] = 0
-    #d11[:, 0] = 0
+    d_a = gradients.copy()
+    d11_a = np.roll(d_a, axis=(0, 1), shift=(-1, -1))  # D(x+1,y+1)
+    d12_a = np.roll(d_a, axis=0, shift=-1)  # D(x+1,y)
+    d1_a = n_y * d11_a + (n_x - n_y) * d12_a  # not divided by n_x yet
+    d21_a = np.roll(d_a, axis=(0, 1), shift=(1, 1))  # D(x-1,y-1)
+    d22_a = np.roll(d_a, axis=0, shift=1)  # D(x-1,y)
+    d2_a = n_y * d21_a + (n_x - n_y) * d22_a  # not divided by n_x yet
+    d_a = n_x*d_a  # avoid division by n_x (potentially 0)
+    is_max_a = np.logical_and(d_a > d1_a, d_a > d2_a)
+    edges_a = np.where(np.logical_and(in_sector_a, is_max_a), gradients,
+                       np.zeros(shape=gradients.shape).astype(np.float32))
 
-    d12 = np.roll(d, axis=1, shift=-1)  # D(x,y+1)
-    #d12[:, 0] = 0
+    d_b = gradients.copy()
+    d11_b = np.roll(d_b, axis=0, shift=-1)  # D (x+1,y+1)
+    d12_b = np.roll(d_b, axis=1, shift=-1)  # D(x,y+1)
+    d1_b = n_x*d11_b + (n_y-n_x)*d12_b  # not divided by n_y yet
+    d21_b = np.roll(d_b, axis=(0, 1), shift=(1, 1))  # D(x-1,y-1)
+    d22_b = np.roll(d_b, axis=1, shift=1)  # D(x,y-1)
+    d2_b = n_x*d21_b + (n_y-n_x)*d22_b   # not divided by n_y yet
+    d_b = n_y * d_b  # avoid division by n_y (potentially 0)
+    is_max_b = np.logical_and(d_b > d1_b, d_b > d2_b)
+    edges_b = np.where(np.logical_and(in_sector_b, is_max_b), gradients,
+                       np.zeros(shape=gradients.shape).astype(np.float32))
 
-    d1 = n_x*d11 + (n_y-n_x)*d12  # not divided by n_y yet
+    d_c = gradients.copy()
+    d11_c = np.roll(d_c, axis=(0, 1), shift=(1, -1))  # D (x-1,y+1)
+    d12_c = np.roll(d_c, axis=1, shift=-1)  # D(x,y+1)
+    d1_c = n_x * d11_c + (n_y - n_x) * d12_c  # not divided by n_y yet
+    d21_c = np.roll(d_c, axis=(0, 1), shift=(-1, +1))  # D(x+1,y-1)
+    d22_c = np.roll(d_c, axis=1, shift=1)  # D(x,y-1)
+    d2_c = n_x * d21_c + (n_y - n_x) * d22_c  # not divided by n_y yet
+    d_c = n_y * d_c  # avoid division by n_y (potentially 0)
+    is_max_c = np.logical_and(d_c > d1_c, d_c > d2_c)
+    edges_c = np.where(np.logical_and(in_sector_c, is_max_c), gradients,
+                       np.zeros(shape=gradients.shape).astype(np.float32))
 
-    d21 = np.roll(d, axis=0, shift=1)  # D(x-1,y-1)
-    d21 = np.roll(d21, axis=1, shift=1)
-    # d21[0, :] = 0
-    #d21[:, d21.shape[1]-1] = 0
+    d_d = gradients.copy()
+    d11_d = np.roll(d_d, axis=(0, 1), shift=(1, -1))  # D (x-1,y+1)
+    d12_d = np.roll(d_d, axis=0, shift=1)  # D(x-1,y)
+    d1_d = n_y * d11_d + (n_x - n_y) * d12_d  # not divided by n_x yet
+    d21_d = np.roll(d_d, axis=(0, 1), shift=(-1, 1))  # D(x+1,y-1)
+    d22_d = np.roll(d_d, axis=0, shift=-1)  # D(x+1,y)
+    d2_d = n_y * d21_d + (n_x - n_y) * d22_d  # not divided by n_x yet
+    d_d = n_x * d_d  # avoid division by n_x (potentially 0)
+    is_max_d = np.logical_and(d_d > d1_d, d_d > d2_d)
+    edges_d = np.where(np.logical_and(in_sector_d, is_max_d), gradients,
+                       np.zeros(shape=gradients.shape).astype(np.float32))
 
-    d22 = np.roll(d, axis=1, shift=1)  # D(x,y-1)
-    #d22[:, d22.shape[1]-1] = 0
-
-    d2 = n_x*d21 + (n_y-n_x)*d22   # not divided by n_y yet
-
-    d = n_y * d  # avoid division by n_y (potentially 0)
-    is_max = np.logical_and(d >= d1, d >= d2)
-
-    edges_std = np.where(np.logical_and(not_shifted, is_max), gradients,
-                         np.zeros(shape=gradients.shape).astype(np.float32))
-
-    # TODO fix coords
-    d_shifted = gradients.copy()
-    d11_shifted = np.roll(d_shifted, axis=1, shift=-1)  # D (x+1,y+1)
-    d11_shifted = np.roll(d11_shifted, axis=0, shift=-1)
-    # d11[d11.shape[0]-1, :] = 0
-    # d11[:, 0] = 0
-
-    d12_shifted = np.roll(d_shifted, axis=0, shift=-1)  # D(x,y+1)
-    # d12[:, 0] = 0
-
-    d1_shifted = n_x * d11_shifted + (n_y - n_x) * d12_shifted  # not divided by n_y yet
-
-    d21_shifted = np.roll(d_shifted, axis=1, shift=1)  # D(x-1,y-1)
-    d21_shifted = np.roll(d21_shifted, axis=0, shift=1)
-    # d21[0, :] = 0
-    # d21[:, d21.shape[1]-1] = 0
-
-    d22_shifted = np.roll(d_shifted, axis=0, shift=1)  # D(x,y-1)
-    # d22[:, d22.shape[1]-1] = 0
-
-    d2_shifted = n_x * d21_shifted + (n_y - n_x) * d22_shifted  # not divided by n_y yet
-
-    d_shifted = n_y * d_shifted  # avoid division by n_y (potentially 0)
-    is_max_shifted = np.logical_and(d_shifted >= d1_shifted, d_shifted >= d2_shifted)
-
-    edges_shifted = np.where(np.logical_and(np.logical_not(not_shifted), is_max_shifted), gradients,
-                             np.zeros(shape=gradients.shape).astype(np.float32))
-
-    edges = edges_std + edges_shifted
+    edges = edges_a + edges_b + edges_c + edges_d
     ######################################################
 
     return edges

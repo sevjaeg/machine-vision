@@ -32,7 +32,7 @@ if __name__ == '__main__':
 
     # Read image
     current_path = Path(__file__).parent
-    img_gray = cv2.imread(str(current_path.joinpath("image/circle.jpg")), cv2.IMREAD_GRAYSCALE)
+    img_gray = cv2.imread(str(current_path.joinpath("image/rubens.jpg")), cv2.IMREAD_GRAYSCALE)
 
 
     # Before we start working with the image, we convert it from uint8 with range [0,255] to float32 with range [0,1]
@@ -40,7 +40,7 @@ if __name__ == '__main__':
     show_image(img_gray, "Original Image", save_image=save_image, use_matplotlib=matplotlib_plotting)
 
     # 1. Blur Image
-    sigma = 1  # Change this value
+    sigma = 3  # Change this value
     img_blur = blur_gauss(img_gray, sigma)
     show_image(img_blur, "Blurred Image", save_image=save_image, use_matplotlib=matplotlib_plotting)
 
