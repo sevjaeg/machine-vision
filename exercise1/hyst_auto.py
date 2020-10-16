@@ -33,10 +33,14 @@ def hyst_thresh_auto(edges_in: np.array, low_prop: float, high_prop: float) -> n
     :rtype: np.array with shape (height, width) with dtype = np.float32 and values either 0 or 1
     """
     ######################################################
-    # Write your own code here
-    hyst_out = edges_in.copy()  # Replace this line
+    print("Calculating hysteresis thresholds")
 
+    pixels = np.sort(edges_in.flatten())
+    pixels = pixels[pixels != 0]
+    low = pixels[round((1-low_prop)*len(pixels))]
+    high = pixels[round((1-high_prop) * len(pixels))]
 
+    hyst_out = hyst_thresh(edges_in, low, high)
 
     ######################################################
     return hyst_out

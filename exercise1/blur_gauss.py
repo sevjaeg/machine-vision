@@ -24,22 +24,21 @@ def blur_gauss(img: np.array, sigma: float) -> np.array:
     :rtype: np.array with shape (height, width) with dtype = np.float32 and values in the range [0.,1.]
     """
     ######################################################
-
+    # formula from the exercise description
     kernel_width = 2 * round(3 * sigma) + 1
+
+    print("Applying Gauß filter with sigma", sigma, "and kernel size", kernel_width)
 
     kernel = np.zeros(shape=(kernel_width, kernel_width))
     for i, row in enumerate(kernel):
-        x = i - np.floor(kernel_width / 2)
+        x = i - np.floor(kernel_width / 2)  # shift the index so the peak of the Gaussian is in the middle of the kernel
         for j, cell in enumerate(row):
             y = j - np.floor(kernel_width / 2)
             kernel[i, j] = 1 / (2 * np.pi * np.power(sigma, 2)) * \
                 np.exp(-(np.power(x, 2) + np.power(y, 2)) / (2 * np.power(sigma, 2)))
 
-    print("Applying Gauß filter with kernel")
-    print(kernel)
-
-    # TODO exact normalization?
-    print(np.sum(kernel.flatten()))
+    # The sum of the kernel created using the formula from the slides slightly differs from 1.0, this is corrected
+    kernel /= np.sum(kernel.flatten())
 
     # TODO border type
     img_blur = cv2.filter2D(img, -1, kernel, borderType=cv2.BORDER_REPLICATE)

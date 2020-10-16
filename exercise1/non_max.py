@@ -38,14 +38,14 @@ def non_max(gradients: np.array, orientations: np.array) -> np.array:
     # B: 45° to 90° and -135° to -90°
     # C: 90° to 135° and -90° to -45°
     # D: 135° to 180° and -45° to 0°
-    in_sector_a = np.logical_or(np.logical_and(orientations >= 0, orientations <= np.pi/4),
+    in_sector_a = np.logical_or(np.logical_and(orientations >= 0, orientations < np.pi/4),
                                 orientations <= -3*np.pi/4)
-    in_sector_b = np.logical_or(np.logical_and(orientations >= np.pi/4, orientations <= np.pi/2),
-                                np.logical_and(orientations >= -3*np.pi/4, orientations <= -np.pi/2))
-    in_sector_c = np.logical_or(np.logical_and(orientations >= np.pi/2, orientations <= 3*np.pi/4),
-                                np.logical_and(orientations >= -np.pi/2, orientations <= -np.pi/4))
+    in_sector_b = np.logical_or(np.logical_and(orientations >= np.pi/4, orientations < np.pi/2),
+                                np.logical_and(orientations >= -3*np.pi/4, orientations < -np.pi/2))
+    in_sector_c = np.logical_or(np.logical_and(orientations >= np.pi/2, orientations < 3*np.pi/4),
+                                np.logical_and(orientations >= -np.pi/2, orientations < -np.pi/4))
     in_sector_d = np.logical_or(orientations >= 3*np.pi/4,
-                                np.logical_and(orientations >= -np.pi/4, orientations <= 0))
+                                np.logical_and(orientations >= -np.pi/4, orientations < 0))
 
     d_a = gradients.copy()
     d11_a = np.roll(d_a, axis=(0, 1), shift=(-1, -1))  # D(x+1,y+1)

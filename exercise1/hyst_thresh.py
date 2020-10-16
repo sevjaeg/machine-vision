@@ -30,10 +30,20 @@ def hyst_thresh(edges_in: np.array, low: float, high: float) -> np.array:
     :rtype: np.array with shape (height, width) with dtype = np.float32 and values either 0 or 1
     """
     ######################################################
-    # Write your own code here
-    bitwise_img = edges_in.copy()  # Replace this line
+    print("Applying hysteresis with t1 = {:.2f} and t2 = {:.2f}".format(low, high))
 
+    edges = edges_in/np.max(edges_in)  # normalize
+    edges = np.where(edges >= low, edges, 0)
 
+    (N, connected_edges) = cv2.connectedComponents((edges*255).astype(np.uint8), connectivity=8)
+
+    bitwise_img = np.zeros(edges.shape)
+    for i in range(1, N):
+        image_i = np.where(connected_edges == i, edges, 0)
+        if np.max(image_i) >= high:
+            bitwise_img += image_i
+
+    bitwise_img = np.where(bitwise_img > 0, 1, 0).astype(np.float32)
 
     ######################################################
     return bitwise_img

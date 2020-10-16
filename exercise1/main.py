@@ -14,6 +14,9 @@ from pathlib import Path
 import cv2
 import numpy as np
 
+# additonal import for time measurement
+import time
+
 from blur_gauss import blur_gauss
 from helper_functions import *
 from hyst_auto import hyst_thresh_auto
@@ -28,7 +31,8 @@ if __name__ == '__main__':
     save_image = True
     matplotlib_plotting = False
 
-    np.set_printoptions(precision=5, suppress=True)
+    # Simplified printing of numpy arrays
+    np.set_printoptions(precision=2, suppress=True)
 
     # Read image
     current_path = Path(__file__).parent
@@ -39,13 +43,27 @@ if __name__ == '__main__':
     img_gray = img_gray.astype(np.float32) / 255.
     show_image(img_gray, "Original Image", save_image=save_image, use_matplotlib=matplotlib_plotting)
 
+    start = time.time()
+
     # 1. Blur Image
     sigma = 3  # Change this value
     img_blur = blur_gauss(img_gray, sigma)
+
+    end = time.time()
+    span = end - start
+    print("{:.0f} ms".format(1000*span))
+
     show_image(img_blur, "Blurred Image", save_image=save_image, use_matplotlib=matplotlib_plotting)
 
     # 2. Edge Detection
+    start = time.time()
+
     gradients, orientations = sobel(img_blur)
+
+    end = time.time()
+    span = end - start
+    print("{:.0f} ms".format(1000*span))
+
     orientations_color = cv2.applyColorMap(np.uint8((orientations.copy() + np.pi) / (2 * np.pi) * 255),
                                            cv2.COLORMAP_RAINBOW)
     orientations_color = orientations_color.astype(np.float32) / 255.
@@ -53,15 +71,27 @@ if __name__ == '__main__':
     show_image(gradient_img, "Gradients", save_image=save_image, use_matplotlib=matplotlib_plotting)
 
     # 3. Non-Maxima Suppression
+    start = time.time()
+
     edges = non_max(gradients, orientations)
 
+    end = time.time()
+    span = end - start
+    print("{:.0f} ms".format(1000*span))
+    start = time.time()
+
     # 4. Hysteresis Thresholding
-    hyst_method_auto = False
+    hyst_method_auto = True
 
     if hyst_method_auto:
-        canny_edges = hyst_thresh_auto(edges, 0.7, 0.3)
+        canny_edges = hyst_thresh_auto(edges, 0.5, 0.2)
     else:
-        canny_edges = hyst_thresh(edges, 0.3, 0.4)
+        canny_edges = hyst_thresh(edges, 0.3, 0.7)
+
+    end = time.time()
+    span = end - start
+    print("{:.0f} ms".format(1000*span))
+
     show_image(canny_edges, "Canny Edges", save_image=save_image, use_matplotlib=matplotlib_plotting)
 
     # Overlay the found edges in red over the original image

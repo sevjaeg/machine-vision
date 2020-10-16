@@ -24,15 +24,12 @@ def sobel(img: np.array) -> (np.array, np.array):
     kernel_x = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]])
     kernel_y = np.transpose(kernel_x)
 
-    print("Applying Sobel filter with kernels")
-    print(kernel_x)
-    print(kernel_y)
+    print("Applying Sobel filter")
 
     g_x = cv2.filter2D(img, -1, kernel_x)
     g_y = cv2.filter2D(img, -1, kernel_y)
 
     gradient = np.sqrt(np.power(g_x, 2) + np.power(g_y, 2))
     orientation = np.arctan2(g_x, g_y)  # not g_y/g_x as in the slides to stay consistent with x and y
-
     ######################################################
     return gradient, orientation
