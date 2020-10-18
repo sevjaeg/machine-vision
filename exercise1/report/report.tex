@@ -4,14 +4,20 @@
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
 
-\usepackage{lmodern}
+\usepackage{lmodern}  % nicer font
 \usepackage{gensymb}
 \usepackage{amsmath}
 \usepackage{amssymb}
-\usepackage{nicefrac}
+\usepackage{nicefrac}  % nicer inline fractions
 \usepackage{listings}
-
+\usepackage{enumerate}
+\usepackage{siunitx}  % easy handling of value + unit (e.g. \SI{10}{\pF})
+% \sisetup{}  % configure siunitx (e.g. locale = DE)
 \usepackage{verbatim}
+\usepackage{subcaption}  % captions for subplots
+\usepackage[european, siunitx]{circuitikz}  % draw circuit diagrams
+\usepackage{enumitem}
+\setlist[itemize]{label=\rule[0.5ex]{0.6ex}{0.6ex}} % nice black squares for itemize environments
 \usepackage{graphicx}
 \graphicspath{{./figures/}}
 
@@ -23,15 +29,15 @@
 	bottom = 3cm
 }
 
-\usepackage[%
+\usepackage[  % ieee style citations (e.g. [1])
 	backend     = biber,
 	maxbibnames = 99,
 	autocite    = footnote,
 	style	    = ieee,
 	citestyle   = numeric-comp,
-	firstinits  = true,
+	doi=false, isbn=false
 ]{biblatex}
-\addbibresource{bibliography.bib}
+\addbibresource{bibliography/bibliography.bib}
 
 \usepackage[hang]{footmisc}
 \renewcommand{\hangfootparindent}{2em} 
@@ -39,9 +45,7 @@
 \renewcommand{\footnotemargin}{0.00001pt}
 \renewcommand{\footnotelayout}{\hspace{2em}}
 
-% last import!
-\usepackage{hyperref}
-
+% add missing hyphenations
 \hyphenation{im-ple-men-ta-tions}
 
 \title{376.054 Machine Vision and Cognitive Robotics\\
@@ -51,15 +55,176 @@
 }
 \date{\today}
 
+% last imports! Modify Title and author
+\usepackage[bookmarksopen,colorlinks,citecolor=black,linkcolor=black, urlcolor = black]{hyperref}
+% after hyperref! Example: In \cref{label}, ... -> In section 2.1, ...
+% works for all labels (figures, sections, chapters, equations, ...)
+\usepackage[noabbrev, nameinlink]{cleveref} 
+
+
 \begin{document}
 
 \maketitle
 \tableofcontents
 \pagebreak
 
-\section{Introduction}
+\section{Experiment 1}
+
+\ref{image_lady}
+
+\begin{figure} [h!]
+\includegraphics[width=5cm]{ex1_lady/pos400.png}
+\centering
+\caption{row $400$ for \ref{1.2} highlighted}
+\label{image_lady}
+\end{figure}
+
+\subsection{Kernel width as function of sigma}
+
+\begin{equation}
+W_{kernel} =  2 \cdot \textrm{round}(3 \sigma) + 1
+\label{w_kernel}
+\end{equation}
+
+% no notable difference with small values of $\sigma$
+\ref{kernel_sigma}
+
+\begin{figure} [h!]
+\begin{subfigure}[b]{0.3\textwidth}
+\includegraphics[width=4.5cm]{ex1_lady/Blurred_Image_s=3_k=3.png}
+\centering
+\subcaption{$W_{kernel}=3$}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.3\textwidth}
+\includegraphics[width=4.5cm]{ex1_lady/Blurred_Image_s=3_k=9.png}
+\centering
+\subcaption{$W_{kernel}=9$}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.3\textwidth}
+\includegraphics[width=4.5cm]{ex1_lady/Blurred_Image_s=3.png}
+\centering
+\subcaption{$W_{kernel}=19$}
+\end{subfigure}
+\caption{Gaussian blurring with $\sigma = 3$ and different kernel sizes. The correct kernel width (as described in Eq. \ref{w_kernel}) is $19$.}
+\label{kernel_sigma}
+\end{figure}
+
+\subsection{Effect of blurring on pixel intensities}
+\label{1.2}
+
+\ref{pixel_intensities}
+
+\begin{figure} [h!]
+\begin{subfigure}[b]{0.45\textwidth}
+\includegraphics[width=8cm,trim={0 0 0 1.25cm},clip]{ex1_lady/intensities_400_gray.png}
+\centering
+\subcaption{Original Image}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.45\textwidth}
+\includegraphics[width=8cm,trim={0 0 0 1.25cm},clip]{ex1_lady/intensities_400_blur1.png}
+\centering
+\subcaption{Blurred ($\sigma=1$)}
+\end{subfigure}
+\vskip\baselineskip
+\begin{subfigure}[b]{0.45\textwidth}
+\includegraphics[width=8cm,trim={0 0 0 1.25cm},clip]{ex1_lady/intensities_400_blur2.png}
+\centering
+\subcaption{Blurred ($\sigma=2$)}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.45\textwidth}
+\includegraphics[width=8cm,trim={0 0 0 1.25cm},clip]{ex1_lady/intensities_400_blur3.png}
+\centering
+\subcaption{Blurred ($\sigma=3$)}
+\end{subfigure}
+\caption{Row $400$}
+\label{pixel_intensities}
+\end{figure}
+
+\subsection{Effect of blurring on non-maximum suppression}
 
 
+\ref{non_maximum}
+
+\begin{figure} [h!]
+\begin{subfigure}[b]{0.22\textwidth}
+\includegraphics[width=4cm,trim={0 0 0.25cm 0},clip]{ex1_lady/Edges_Original_Image.png}
+\centering
+\subcaption{Original Image}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.22\textwidth}
+\includegraphics[width=4cm,trim={0 0 0.25cm 0},clip]{ex1_lady/Edges_Blurred_Image_s=1.png}
+\centering
+\subcaption{Blurred ($\sigma=1$)}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.22\textwidth}
+\includegraphics[width=4cm,trim={0 0 0.25cm 0},clip]{ex1_lady/Edges_Blurred_Image_s=2.png}
+\centering
+\subcaption{Blurred ($\sigma=2$)}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.22\textwidth}
+\includegraphics[width=4cm,trim={0 0 0.25cm 0},clip]{ex1_lady/Edges_Blurred_Image_s=3.png}
+\centering
+\subcaption{Blurred ($\sigma=3$)}
+\end{subfigure}
+\caption{}
+\label{non_maximum}
+\end{figure}
+
+\subsection{Effect of blurring on the edges after hysteresis thresholding}
+	
+\ref{hystersis}
+
+$t_1 = 0.25, t_2 = 0.5$
+\begin{figure} [h!]
+\begin{subfigure}[b]{0.22\textwidth}
+\includegraphics[width=4cm,trim={0 0 0.25cm 0},clip]{ex1_lady/Canny_Edges_Original.png}
+\centering
+\subcaption{Original Image}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.22\textwidth}
+\includegraphics[width=4cm,trim={0 0 0.25cm 0},clip]{ex1_lady/Canny_Edges_Blurred_s=1.png}
+\centering
+\subcaption{Blurred ($\sigma=1$)}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.22\textwidth}
+\includegraphics[width=4cm,trim={0 0 0.25cm 0},clip]{ex1_lady/Canny_Edges_Blurred_s=2.png}
+\centering
+\subcaption{Blurred ($\sigma=2$)}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.22\textwidth}
+\includegraphics[width=4cm,trim={0 0 0.25cm 0},clip]{ex1_lady/Canny_Edges_Blurred_s=3.png}
+\centering
+\subcaption{Blurred ($\sigma=3$)}
+\end{subfigure}
+\caption{$t_1 = 0.25$ and $t_2 = 0.5$}
+\label{hystersis}
+\end{figure}
+
+\clearpage
+\section{Experiment 2}
+\subsection{Parameters of hysteresis thresholding}
+
+\subsection{Hysteresis thresholding on different images}
+
+\subsection{Influence of automatic threshold selection}
+
+\subsection{Limitations of automatic threshold selection}
+
+\clearpage
+\section{Experiment 3}
+\subsection{Influence of noise on edge detection}
+
+\subsection{Alleviating the influence of noise}
 
 \sloppy
 \printbibliography

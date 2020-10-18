@@ -11,7 +11,7 @@ import cv2
 import numpy as np
 
 
-def blur_gauss(img: np.array, sigma: float) -> np.array:
+def blur_gauss(img: np.array, sigma: float, kernel_width=0) -> np.array:
     """ Blur the input image with a Gaussian filter with standard deviation of sigma.
 
     :param img: Grayscale input image
@@ -25,7 +25,8 @@ def blur_gauss(img: np.array, sigma: float) -> np.array:
     """
     ######################################################
     # formula from the exercise description
-    kernel_width = 2 * round(3 * sigma) + 1
+    if kernel_width == 0:
+        kernel_width = 2 * round(3 * sigma) + 1
 
     print("Applying Gauß filter with sigma", sigma, "and kernel size", kernel_width)
 
