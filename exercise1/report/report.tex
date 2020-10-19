@@ -215,7 +215,84 @@ $t_1 = 0.25, t_2 = 0.5$
 
 \clearpage
 \section{Experiment 2}
+
+\begin{figure} [h!]
+\begin{subfigure}[b]{0.3\textwidth}
+\includegraphics[height=6cm]{beardman.png}
+\centering
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.6\textwidth}
+\includegraphics[height=6cm]{parliament.png}
+\centering
+\end{subfigure}
+\caption{Additional images used within this experiment}
+\label{originals}
+\end{figure}
+
 \subsection{Parameters of hysteresis thresholding}
+
+\begin{figure} [h!]
+\begin{subfigure}[b]{0.2\textwidth}
+\includegraphics[height=5cm]{ex2/CannyA_0.10_0.70.png}
+\centering
+\subcaption{$t_1=0.1$}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.22\textwidth}
+\includegraphics[height=5cm]{ex2/CannyA_0.30_0.70.png}
+\centering
+\subcaption{$t_1=0.5$}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.22\textwidth}
+\includegraphics[height=5cm]{ex2/CannyA_0.50_0.70.png}
+\centering
+\subcaption{$t_1=0.5$}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.22\textwidth}
+\includegraphics[height=5cm]{ex2/CannyA_0.70_0.70.png}
+\centering
+\subcaption{$t_1=0.5$}
+\end{subfigure}
+\caption{Influence of the hysteresis threshold $t_1$. The value of $t_2$ is $0.7$ in all images.}
+\label{hysteresis_t1}
+\end{figure}
+
+\begin{figure} [h!]
+\begin{subfigure}[b]{0.18\textwidth}
+\includegraphics[height=4.2cm]{ex2/CannyA_0.10_0.10.png}
+\centering
+\subcaption{$t_2=0.1$}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.18\textwidth}
+\includegraphics[height=4.2cm]{ex2/CannyA_0.10_0.30.png}
+\centering
+\subcaption{$t_2=0.3$}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.18\textwidth}
+\includegraphics[height=4.2cm]{ex2/CannyA_0.10_0.50.png}
+\centering
+\subcaption{$t_2=0.5$}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.18\textwidth}
+\includegraphics[height=4.2cm]{ex2/CannyA_0.10_0.70.png}
+\centering
+\subcaption{$t_2=0.7$}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.18\textwidth}
+\includegraphics[height=4.2cm]{ex2/CannyA_0.10_0.90.png}
+\centering
+\subcaption{$t_2=0.9$}
+\end{subfigure}
+\caption{Influence of the hysteresis threshold $t_2$. The value of $t_1$ is $0.1$ in all images.}
+\label{hysteresis_t2}
+\end{figure}
 
 \subsection{Hysteresis thresholding on different images}
 
@@ -223,13 +300,16 @@ $t_1 = 0.25, t_2 = 0.5$
 
 \subsection{Limitations of automatic threshold selection}
 
+
 \clearpage
 \section{Experiment 3}
 \subsection{Influence of noise on edge detection}
 
 \subsection{Alleviating the influence of noise}
 
-\sloppy
-\printbibliography
+\subsubsection*{Altering $\sigma$}
+
+\subsubsection*{Altering the hysteresis thresholds}
+
 
 \end{document}

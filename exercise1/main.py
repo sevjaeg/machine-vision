@@ -28,7 +28,7 @@ from sobel import sobel
 if __name__ == '__main__':
 
     # Define behavior of the show_image function. You can change these variables if necessary
-    save_image = True
+    save_image = False
     matplotlib_plotting = False
 
     # Simplified printing of numpy arrays
@@ -36,7 +36,7 @@ if __name__ == '__main__':
 
     # Read image
     current_path = Path(__file__).parent
-    img_gray = cv2.imread(str(current_path.joinpath("image/rubens.jpg")), cv2.IMREAD_GRAYSCALE)
+    img_gray = cv2.imread(str(current_path.joinpath("image/circle.jpg")), cv2.IMREAD_GRAYSCALE)
 
 
     # Before we start working with the image, we convert it from uint8 with range [0,255] to float32 with range [0,1]
