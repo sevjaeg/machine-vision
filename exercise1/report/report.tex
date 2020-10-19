@@ -70,40 +70,44 @@
 
 \section{Experiment 1}
 
-\ref{image_lady}
+The first experiment deals with the Gaussian blurring and in particular the influence of its parameter $\sigma$. The input image for this experiment is shown in Figure \ref{image_lady}.
 
 \begin{figure} [h!]
 \includegraphics[width=5cm]{ex1_lady/pos400.png}
 \centering
-\caption{row $400$ for \ref{1.2} highlighted}
+\caption{The grey scale detail from the painting The Honeysuckle Bower by Peter Paul Rubens which is used as input for this experiment. Row $400$, which is relevant for Section \ref{1.2}, is highlighted.}
 \label{image_lady}
 \end{figure}
 
 \subsection{Kernel width as function of sigma}
 
+The kernel width $W_{kernel}$\footnote{Note that all kernels are quadratic matrices with $W_{kernel}\times W_{kernel}$ entries.} used for all Gaussian filtering operations in the following sections is given as
 \begin{equation}
-W_{kernel} =  2 \cdot \textrm{round}(3 \sigma) + 1
+W_{kernel} =  2 \cdot \textrm{round}(3 \sigma) + 1.
 \label{w_kernel}
 \end{equation}
 
+This is beneficial because the entries of the kernel decrease very quickly with the distance from the center for small values of $\sigma$. As larger kernels increase the computational effort for the filtering operation, the runtime can be reduced in these cases by using a smaller kernel. However, larger values of $\sigma$ yield larger peaks in the Gaussian distribution, so a larger kernel is required for precise filtering.
+
+
 % no notable difference with small values of $\sigma$
-\ref{kernel_sigma}
+Figure \ref{kernel_sigma} compares different kernel widths with $\sigma=3$. It is apparent, that small kernels are insufficient to represent the whole filter, so the smoothing effect is significantly reduced. When it comes to smaller values of $\sigma$, this effect becomes less influential. For $\sigma=1$, there is hardly any difference between $W_{kernel} = 3$ and $W_{kernel} = 7$ (which is the value obtained from Equation \ref{w_kernel}) observable.
 
 \begin{figure} [h!]
 \begin{subfigure}[b]{0.3\textwidth}
-\includegraphics[width=4.5cm]{ex1_lady/Blurred_Image_s=3_k=3.png}
+\includegraphics[width=4cm]{ex1_lady/Blurred_Image_s=3_k=3.png}
 \centering
 \subcaption{$W_{kernel}=3$}
 \end{subfigure}
 \hfill
 \begin{subfigure}[b]{0.3\textwidth}
-\includegraphics[width=4.5cm]{ex1_lady/Blurred_Image_s=3_k=9.png}
+\includegraphics[width=4cm]{ex1_lady/Blurred_Image_s=3_k=9.png}
 \centering
 \subcaption{$W_{kernel}=9$}
 \end{subfigure}
 \hfill
 \begin{subfigure}[b]{0.3\textwidth}
-\includegraphics[width=4.5cm]{ex1_lady/Blurred_Image_s=3.png}
+\includegraphics[width=4cm]{ex1_lady/Blurred_Image_s=3.png}
 \centering
 \subcaption{$W_{kernel}=19$}
 \end{subfigure}
@@ -113,8 +117,6 @@ W_{kernel} =  2 \cdot \textrm{round}(3 \sigma) + 1
 
 \subsection{Effect of blurring on pixel intensities}
 \label{1.2}
-
-\ref{pixel_intensities}
 
 \begin{figure} [h!]
 \begin{subfigure}[b]{0.45\textwidth}
@@ -140,14 +142,15 @@ W_{kernel} =  2 \cdot \textrm{round}(3 \sigma) + 1
 \centering
 \subcaption{Blurred ($\sigma=3$)}
 \end{subfigure}
-\caption{Row $400$}
+\caption{Comparison of pixel intensities in row $400$ (s. Figure \ref{image_lady}).}
 \label{pixel_intensities}
 \end{figure}
 
+Figure \ref{pixel_intensities} compares the pixel intensities in a row of the original image with the filtered image using different values of $\sigma$. It shows that the Gaussian filtering causes a smoothing of the pixel intensity distribution proportional to $\sigma$.
+
 \subsection{Effect of blurring on non-maximum suppression}
 
-
-\ref{non_maximum}
+Figure \ref{non_maximum} displays the result of the non-maximum suppression algorithm with differently filtered input images. Less Gaussian blurring tends to yield images with more edges, while stronger filtering (higher value of $\sigma$ eliminates the less significant edges and results in images with the most important edges.
 
 \begin{figure} [h!]
 \begin{subfigure}[b]{0.22\textwidth}
@@ -173,7 +176,7 @@ W_{kernel} =  2 \cdot \textrm{round}(3 \sigma) + 1
 \centering
 \subcaption{Blurred ($\sigma=3$)}
 \end{subfigure}
-\caption{}
+\caption{Output images of the non-maximum suppression algorithm with different input images.}
 \label{non_maximum}
 \end{figure}
 
