@@ -29,24 +29,12 @@
 	bottom = 3cm
 }
 
-\usepackage[  % ieee style citations (e.g. [1])
-	backend     = biber,
-	maxbibnames = 99,
-	autocite    = footnote,
-	style	    = ieee,
-	citestyle   = numeric-comp,
-	doi=false, isbn=false
-]{biblatex}
-\addbibresource{bibliography/bibliography.bib}
-
 \usepackage[hang]{footmisc}
 \renewcommand{\hangfootparindent}{2em} 
 \renewcommand{\hangfootparskip}{2em}
 \renewcommand{\footnotemargin}{0.00001pt}
 \renewcommand{\footnotelayout}{\hspace{2em}}
 
-% add missing hyphenations
-\hyphenation{im-ple-men-ta-tions}
 
 \title{376.054 Machine Vision and Cognitive Robotics\\
 	   Exercise 1: Canny Edge Detector}
@@ -233,7 +221,7 @@ $t_1 = 0.25, t_2 = 0.5$
 \subsection{Parameters of hysteresis thresholding}
 
 \begin{figure} [h!]
-\begin{subfigure}[b]{0.2\textwidth}
+\begin{subfigure}[b]{0.22\textwidth}
 \includegraphics[height=5cm]{ex2/CannyA_0.10_0.70.png}
 \centering
 \subcaption{$t_1=0.1$}
@@ -294,9 +282,49 @@ $t_1 = 0.25, t_2 = 0.5$
 \label{hysteresis_t2}
 \end{figure}
 
-\subsection{Hysteresis thresholding on different images}
+\subsection{Hysteresis thresholding with different images}
+
+\begin{figure} [h!]
+\begin{subfigure}[b]{0.25\textwidth}
+\includegraphics[height=5cm]{ex2/CannyA_0.30_0.50.png}
+\centering
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.2\textwidth}
+\includegraphics[height=5cm]{ex2/CannyB_0.30_0.50.png}
+\centering
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.5\textwidth}
+\includegraphics[height=5cm]{ex2/CannyC_0.30_0.50.png}
+\centering
+\end{subfigure}
+\caption{Hysteresis thresholding with $t_1=0.3$ and $t_2=0.7$ for different images.}
+\label{hysteresis_different}
+\end{figure}
 
 \subsection{Influence of automatic threshold selection}
+
+% TODO issue
+\begin{figure} [h!]
+\begin{subfigure}[b]{0.25\textwidth}
+\includegraphics[height=5cm]{ex2/AutoA_0.10_0.30.png}
+\centering
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.2\textwidth}
+\includegraphics[height=5cm]{ex2/AutoB_0.10_0.30.png}
+\centering
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.5\textwidth}
+\includegraphics[height=5cm]{ex2/AutoC_0.10_0.30.png}
+\centering
+\end{subfigure}
+\caption{Automatic hysteresis threshold detection with $30\%$ of the edges above $t_1$ and $10\%$ above $t_2$.}
+\label{hysteresis_auto}
+\end{figure}
+
 
 \subsection{Limitations of automatic threshold selection}
 
@@ -305,9 +333,85 @@ $t_1 = 0.25, t_2 = 0.5$
 \section{Experiment 3}
 \subsection{Influence of noise on edge detection}
 
+\begin{figure} [h!]
+\begin{subfigure}[b]{0.22\textwidth}
+\includegraphics[height=5cm]{ex3/Noise_0.05.png}
+\centering
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.22\textwidth}
+\includegraphics[height=5cm]{ex3/Noise_0.10.png}
+\centering
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.22\textwidth}
+\includegraphics[height=5cm]{ex3/Noise_0.20.png}
+\centering
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.22\textwidth}
+\includegraphics[height=5cm]{ex3/Noise_0.50.png}
+\centering
+\end{subfigure}
+\vskip\baselineskip
+\begin{subfigure}[b]{0.22\textwidth}
+\includegraphics[height=5cm]{ex3/Edges_Noise_0.05.png}
+\centering
+\subcaption{$\sigma_{noise}=0.05$}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.22\textwidth}
+\includegraphics[height=5cm]{ex3/Edges_Noise_0.10.png}
+\centering
+\subcaption{$\sigma_{noise}=0.1$}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.22\textwidth}
+\includegraphics[height=5cm]{ex3/Edges_Noise_0.20.png}
+\centering
+\subcaption{$\sigma_{noise}=0.2$}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.22\textwidth}
+\includegraphics[height=5cm]{ex3/Edges_Noise_0.50.png}
+\centering
+\subcaption{$\sigma_{noise}=0.5$}
+\end{subfigure}
+\caption{Images (top) and detected edges (bottom) for Gaussian noise added to the input images.}
+\label{noise}
+\end{figure}
+
 \subsection{Alleviating the influence of noise}
 
 \subsubsection*{Altering $\sigma$}
+
+\begin{figure} [h!]
+\begin{subfigure}[b]{0.22\textwidth}
+\includegraphics[height=5cm]{ex3/No_noise.png}
+\centering
+\subcaption{No noise}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.22\textwidth}
+\includegraphics[height=5cm]{ex3/Edges_Noise_0.2_blurred_with_1.00.png}
+\centering
+\subcaption{$\sigma=1$}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.22\textwidth}
+\includegraphics[height=5cm]{ex3/Edges_Noise_0.2_blurred_with_2.00.png}
+\centering
+\subcaption{$\sigma=2$}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.22\textwidth}
+\includegraphics[height=5cm]{ex3/Edges_Noise_0.2_blurred_with_2.00.png}
+\centering
+\subcaption{$\sigma=4$}
+\end{subfigure}
+\caption{TODO} % sigma_noise, t1, t2}
+\label{noise_sigma}
+\end{figure}
 
 \subsubsection*{Altering the hysteresis thresholds}
 
