@@ -41,7 +41,7 @@ def blur_gauss(img: np.array, sigma: float, kernel_width=0) -> np.array:
     # The sum of the kernel created using the formula from the slides slightly differs from 1.0, this is corrected
     kernel /= np.sum(kernel.flatten())
 
-    # TODO border type
+    # Replicate avoids edges at the border
     img_blur = cv2.filter2D(img, -1, kernel, borderType=cv2.BORDER_REPLICATE)
 
     ######################################################

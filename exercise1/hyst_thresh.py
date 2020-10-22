@@ -38,10 +38,9 @@ def hyst_thresh(edges_in: np.array, low: float, high: float) -> np.array:
     # returns the number of connected components and an image with the connected components numbered
     (N, connected_edges) = cv2.connectedComponents((edges*255).astype(np.uint8), connectivity=8)
 
-    # TODO optimize
     bitwise_img = np.zeros(edges.shape)
-    for i in range(1, N):
-        image_i = np.where(connected_edges == i, edges, 0)
+    for i in range(1, N):  # iterate over connected components
+        image_i = np.where(connected_edges == i, edges, 0)  # select the pixels belonging to the component
         if (image_i >= high).any():
             bitwise_img += image_i
 

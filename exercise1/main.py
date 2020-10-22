@@ -36,7 +36,7 @@ if __name__ == '__main__':
 
     # Read image
     current_path = Path(__file__).parent
-    img_gray = cv2.imread(str(current_path.joinpath("image/circle.jpg")), cv2.IMREAD_GRAYSCALE)
+    img_gray = cv2.imread(str(current_path.joinpath("image/beardman.jpg")), cv2.IMREAD_GRAYSCALE)
 
 
     # Before we start working with the image, we convert it from uint8 with range [0,255] to float32 with range [0,1]
