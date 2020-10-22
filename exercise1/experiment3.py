@@ -37,20 +37,22 @@ canny_edges = hyst_thresh(edges, low, high)
 show_image(canny_edges, "No noise", save_image=save_image,
            use_matplotlib=matplotlib_plotting)
 
-# for s in [0.02, 0.05, 0.1, 0.2, 0.5]:
-#     img_noise = add_gaussian_noise(img_gray, sigma=s)
-#     show_image(img_noise, "Noise {:.2f}".format(s), save_image=save_image,
-#                use_matplotlib=matplotlib_plotting)
-#     img_blur = blur_gauss(img_noise, sigma)
-#     gradients, orientations = sobel(img_blur)
-#     edges = non_max(gradients, orientations)
-#     low = 0.25
-#     high = 0.35
-#     canny_edges = hyst_thresh(edges, low, high)
-#     show_image(canny_edges, "Edges Noise {:.2f}".format(s), save_image=save_image,
-#                use_matplotlib=matplotlib_plotting)
+# 3.1
+for s in [0.02, 0.05, 0.1, 0.2, 0.5]:
+    img_noise = add_gaussian_noise(img_gray, sigma=s)
+    show_image(img_noise, "Noise {:.2f}".format(s), save_image=save_image,
+               use_matplotlib=matplotlib_plotting)
+    img_blur = blur_gauss(img_noise, sigma)
+    gradients, orientations = sobel(img_blur)
+    edges = non_max(gradients, orientations)
+    low = 0.25
+    high = 0.35
+    canny_edges = hyst_thresh(edges, low, high)
+    show_image(canny_edges, "Edges Noise {:.2f}".format(s), save_image=save_image,
+               use_matplotlib=matplotlib_plotting)
 
 
+# 3.2
 for sigma in [1, 2, 3, 4]:
     img_noise = add_gaussian_noise(img_gray, sigma=0.2)
     img_blur = blur_gauss(img_noise, sigma)
@@ -61,5 +63,8 @@ for sigma in [1, 2, 3, 4]:
     canny_edges = hyst_thresh(edges, low, high)
     show_image(canny_edges, "Edges Noise 0.2 blurred with {:.2f}".format(sigma), save_image=save_image,
                use_matplotlib=matplotlib_plotting)
+
+
+# TODO play with t1, t2
 
 cv2.destroyAllWindows()

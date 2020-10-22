@@ -61,7 +61,7 @@
 The first experiment deals with the Gaussian blurring and in particular the influence of its parameter $\sigma$. The input image for this experiment is shown in Figure \ref{image_lady}.
 
 \begin{figure} [h!]
-\includegraphics[width=5cm]{ex1_lady/pos400.png}
+\includegraphics[width=4cm]{ex1_lady/pos400.png}
 \centering
 \caption{The grey scale detail from the painting The Honeysuckle Bower by Peter Paul Rubens which is used as input for this experiment. Row $400$, which is relevant for Section \ref{1.2}, is highlighted.}
 \label{image_lady}
@@ -77,8 +77,7 @@ W_{kernel} =  2 \cdot \textrm{round}(3 \sigma) + 1.
 
 This is beneficial because the entries of the kernel decrease very quickly with the distance from the center for small values of $\sigma$. As larger kernels increase the computational effort for the filtering operation, the runtime can be reduced in these cases by using a smaller kernel. However, larger values of $\sigma$ yield larger peaks in the Gaussian distribution, so a larger kernel is required for precise filtering.
 
-
-% no notable difference with small values of $\sigma$
+% TODO why do the effects occur?
 Figure \ref{kernel_sigma} compares different kernel widths with $\sigma=3$. It is apparent, that small kernels are insufficient to represent the whole filter, so the smoothing effect is significantly reduced. When it comes to smaller values of $\sigma$, this effect becomes less influential. For $\sigma=1$, there is hardly any difference between $W_{kernel} = 3$ and $W_{kernel} = 7$ (which is the value obtained from Equation \ref{w_kernel}) observable.
 
 \begin{figure} [h!]
@@ -138,7 +137,7 @@ Figure \ref{pixel_intensities} compares the pixel intensities in a row of the or
 
 \subsection{Effect of blurring on non-maximum suppression}
 
-Figure \ref{non_maximum} displays the result of the non-maximum suppression algorithm with differently filtered input images. Less Gaussian blurring tends to yield images with more edges, while stronger filtering (higher value of $\sigma$ eliminates the less significant edges and results in images with the most important edges.
+Figure \ref{non_maximum} displays the result of the non-maximum suppression algorithm with differently filtered input images. Less Gaussian blurring tends to yield images with more edges, while stronger filtering (higher values of $\sigma$) eliminates noise and the less significant edges and results in images consisting of the most significant edges. This is reasonable, as the Sobel filter amplifies noise, which is cancelled by Gaussian blurring. Furthermore, stronger filtering reduces the intensity of the remaining edges.
 
 \begin{figure} [h!]
 \begin{subfigure}[b]{0.22\textwidth}
@@ -164,15 +163,15 @@ Figure \ref{non_maximum} displays the result of the non-maximum suppression algo
 \centering
 \subcaption{Blurred ($\sigma=3$)}
 \end{subfigure}
-\caption{Output images of the non-maximum suppression algorithm with different input images.}
+\caption{Output images of the non-maximum suppression algorithm with different Gaussian blurring.}
 \label{non_maximum}
 \end{figure}
 
-\subsection{Effect of blurring on the edges after hysteresis thresholding}
-	
-\ref{hystersis}
+\newpage
+\subsection{Effect of blurring on the edges after hysteresis thresholding}	
+\label{blur}
+Figure \ref{hystersis} compares the output of the Canny edge detection with differently blurred images. Again, it becomes apparent that stronger blurring reduces noise and removes less significant edges. However, as the hysteresis algorithm sets all pixels either to 0 or to 1, blurring does not reduce the intensity of the edges (in contrast to the previous section). In addition, Figure \ref{hystersis} shows that no Gaussian filtering yields significantly worse results. This is due to the high noise level after Sobel filtering.
 
-$t_1 = 0.25, t_2 = 0.5$
 \begin{figure} [h!]
 \begin{subfigure}[b]{0.22\textwidth}
 \includegraphics[width=4cm,trim={0 0 0.25cm 0},clip]{ex1_lady/Canny_Edges_Original.png}
@@ -197,12 +196,13 @@ $t_1 = 0.25, t_2 = 0.5$
 \centering
 \subcaption{Blurred ($\sigma=3$)}
 \end{subfigure}
-\caption{$t_1 = 0.25$ and $t_2 = 0.5$}
+\caption{Canny edges with the hysteresis parameters $t_1 = 0.25$ and $t_2 = 0.5$ and different Gaussian blurring.}
 \label{hystersis}
 \end{figure}
 
 \clearpage
 \section{Experiment 2}
+This experiment deals with hysteresis thresholding and its performance on different images. Therefore, the additional input images depicted in Figure \ref{originals} are used. The value of $\sigma$ is $1$ throughout this experiment.
 
 \begin{figure} [h!]
 \begin{subfigure}[b]{0.3\textwidth}
@@ -220,6 +220,11 @@ $t_1 = 0.25, t_2 = 0.5$
 
 \subsection{Parameters of hysteresis thresholding}
 
+
+Hysteresis thresholding uses two parameters: $t_1$ is the minimal required intensity to potentially be considered an edge while each edge has to contain at least one pixel with an intensity of at least $t_2$.
+
+Figure \ref{hysteresis_t1} depicts the influence of $t_1$ on the detected edges. It is notable that not only the number of detected edges but also their length is reduced. So $t_1$ is a decent parameter to get rid of noise and artefacts but not suitable to extract the most significant edges as they are not fully preserved.
+
 \begin{figure} [h!]
 \begin{subfigure}[b]{0.22\textwidth}
 \includegraphics[height=5cm]{ex2/CannyA_0.10_0.70.png}
@@ -230,7 +235,7 @@ $t_1 = 0.25, t_2 = 0.5$
 \begin{subfigure}[b]{0.22\textwidth}
 \includegraphics[height=5cm]{ex2/CannyA_0.30_0.70.png}
 \centering
-\subcaption{$t_1=0.5$}
+\subcaption{$t_1=0.3$}
 \end{subfigure}
 \hfill
 \begin{subfigure}[b]{0.22\textwidth}
@@ -242,11 +247,14 @@ $t_1 = 0.25, t_2 = 0.5$
 \begin{subfigure}[b]{0.22\textwidth}
 \includegraphics[height=5cm]{ex2/CannyA_0.70_0.70.png}
 \centering
-\subcaption{$t_1=0.5$}
+\subcaption{$t_1=0.7$}
 \end{subfigure}
 \caption{Influence of the hysteresis threshold $t_1$. The value of $t_2$ is $0.7$ in all images.}
 \label{hysteresis_t1}
 \end{figure}
+
+\newpage
+Figure \ref{hysteresis_t2} presents the influence of $t_2$ on the Canny edge detection algorithm. It becomes apparent that high values of this parameter leads to a selection of the most significant values. Especially if $t_1$ has a relatively low value the edges are preserved in their full length.
 
 \begin{figure} [h!]
 \begin{subfigure}[b]{0.18\textwidth}
@@ -284,28 +292,39 @@ $t_1 = 0.25, t_2 = 0.5$
 
 \subsection{Hysteresis thresholding with different images}
 
+When the Canny algorithm is a applied to images of a different structure, the resulting edges might have different semantics. Some examples are shown in Figure \ref{hysteresis_different}. While the edges in Figure \ref{left} roughly depict the outline of the shown person, Figure \ref{mid} shows only a part of the significant structures. In contrast, Figure \ref{right} show not only the outline of the depicted building but also a notable number of details. This is due to its high regularity (i.e. the edges and the structural details are very similar).
+In some cases this might however be beneficial. For instance in highly regular problems such as visual inspection on a band conveyor, constant thresholds lead to comparable edges as the background and the general structure of the image hardly change.
+
 \begin{figure} [h!]
 \begin{subfigure}[b]{0.25\textwidth}
 \includegraphics[height=5cm]{ex2/CannyA_0.30_0.50.png}
 \centering
+\subcaption{}
+\label{left}
 \end{subfigure}
 \hfill
 \begin{subfigure}[b]{0.2\textwidth}
 \includegraphics[height=5cm]{ex2/CannyB_0.30_0.50.png}
 \centering
+\subcaption{}
+\label{mid}
 \end{subfigure}
 \hfill
 \begin{subfigure}[b]{0.5\textwidth}
 \includegraphics[height=5cm]{ex2/CannyC_0.30_0.50.png}
 \centering
+\subcaption{}
+\label{right}
 \end{subfigure}
 \caption{Hysteresis thresholding with $t_1=0.3$ and $t_2=0.7$ for different images.}
 \label{hysteresis_different}
 \end{figure}
 
+\newpage
 \subsection{Influence of automatic threshold selection}
 
-% TODO issue
+To overcome the issues described in the previous section, automatic threshold detection might be implemented. The resulting images are shown in Figure \ref{hysteresis_auto}. Overall the detected edges are more comparable than in Figure \ref{hysteresis_different}. This is due to the fact that not edges of the  same strength are detected across different images but the most significant edges regardless of their actual strength.
+
 \begin{figure} [h!]
 \begin{subfigure}[b]{0.25\textwidth}
 \includegraphics[height=5cm]{ex2/AutoA_0.10_0.30.png}
@@ -328,10 +347,17 @@ $t_1 = 0.25, t_2 = 0.5$
 
 \subsection{Limitations of automatic threshold selection}
 
+The automatic threshold selection is based on the assumptions that all images have a similar number of edges. In case this is not given (e.g. plain background without edges or an image taken through a lattice fence) the results might not be satisfactory. At least the problem of an insufficient number of edges within an image can be alleviated by using a minimal value of $t_1$.
+
 
 \clearpage
 \section{Experiment 3}
+
+In this experiment Gaussian noise with $\mu = 0$ and $\sigma=\sigma_{noise}$ is added to the input image shown in Figure \ref{image_lady}.
+
 \subsection{Influence of noise on edge detection}
+
+Figure \ref{noise} shows the input image and the detected edges for different noise levels. As expected, the edge detection is disturbed by the noise and additional edges emerge. At some level the original shape can not be detected any longer.
 
 \begin{figure} [h!]
 \begin{subfigure}[b]{0.22\textwidth}
@@ -377,13 +403,14 @@ $t_1 = 0.25, t_2 = 0.5$
 \centering
 \subcaption{$\sigma_{noise}=0.5$}
 \end{subfigure}
-\caption{Images (top) and detected edges (bottom) for Gaussian noise added to the input images.}
+\caption{Images (top) and detected edges (bottom) for Gaussian noise added to the input images. The value of $\sigma$ in the Gaussian filter is $1$, $t_1=0.25$ and $t_2 = 0.35$.}
 \label{noise}
 \end{figure}
 
+\newpage
 \subsection{Alleviating the influence of noise}
 
-\subsubsection*{Altering $\sigma$}
+The influence of noise can be alleviated with stronger Gaussian blurring. As shown in Figure \ref{noise_sigma}, higher levels of $\sigma$ lead to better edge detection results. However, the effects described in Section \ref{blur} are still observed.
 
 \begin{figure} [h!]
 \begin{subfigure}[b]{0.22\textwidth}
@@ -409,11 +436,11 @@ $t_1 = 0.25, t_2 = 0.5$
 \centering
 \subcaption{$\sigma=4$}
 \end{subfigure}
-\caption{TODO} % sigma_noise, t1, t2}
+\caption{Detected edges for different blur levels with $\sigma_{noise}=0.2$, $t_1=0.25$ and $t_2=0.35$.} 
 \label{noise_sigma}
 \end{figure}
 
-\subsubsection*{Altering the hysteresis thresholds}
-
+% TODO
+Varying the hysteresis thresholds $t_1$ and $t_2$ might be helpful for lower noise levels (e.g. by increasing $t_1$), however once the noise level is of similar magnitude as the original edges it has hardly any positive effect.
 
 \end{document}
