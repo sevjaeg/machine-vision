@@ -98,7 +98,7 @@ Figure \ref{kernel_sigma} compares different kernel widths with $\sigma=3$. It i
 \centering
 \subcaption{$W_{kernel}=19$}
 \end{subfigure}
-\caption{Gaussian blurring with $\sigma = 3$ and different kernel sizes. The correct kernel width (as described in Eq. \ref{w_kernel}) is $19$.}
+\caption{Gaussian blurring with $\sigma = 3$ and different kernel sizes. The correct kernel width (as described in Equation \ref{w_kernel}) is $19$.}
 \label{kernel_sigma}
 \end{figure}
 
@@ -163,7 +163,7 @@ Figure \ref{non_maximum} displays the result of the non-maximum suppression algo
 \centering
 \subcaption{Blurred ($\sigma=3$)}
 \end{subfigure}
-\caption{Output images of the non-maximum suppression algorithm with different Gaussian blurring.}
+\caption{Output images of the non-maximum suppression algorithm with different Gaussian blurring parameters}
 \label{non_maximum}
 \end{figure}
 
@@ -292,7 +292,7 @@ Figure \ref{hysteresis_t2} presents the influence of $t_2$ on the Canny edge det
 
 \subsection{Hysteresis thresholding with different images}
 
-When the Canny algorithm is a applied to images of a different structure, the resulting edges might have different semantics. Some examples are shown in Figure \ref{hysteresis_different}. While the edges in Figure \ref{left} roughly depict the outline of the shown person, Figure \ref{mid} shows only a part of the significant structures. In contrast, Figure \ref{right} show not only the outline of the depicted building but also a notable number of details. This is due to its high regularity (i.e. the edges and the structural details are very similar).
+When the Canny algorithm is a applied to images of a different structure, the resulting edges might have different semantics. Some examples are shown in Figure \ref{hysteresis_different}. While the edges in Figure \ref{left} roughly depict the outline of the shown person, Figure \ref{mid} shows only a part of the significant structures. In contrast, Figure \ref{right} shows not only the outline of the depicted building but also a notable number of details. This is due to its high regularity (i.e. the edges and the structural details are very similar).
 In some cases this might however be beneficial. For instance in highly regular problems such as visual inspection on a band conveyor, constant thresholds lead to comparable edges as the background and the general structure of the image hardly change.
 
 \begin{figure} [h!]

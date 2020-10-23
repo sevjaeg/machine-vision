@@ -64,7 +64,4 @@ for sigma in [1, 2, 3, 4]:
     show_image(canny_edges, "Edges Noise 0.2 blurred with {:.2f}".format(sigma), save_image=save_image,
                use_matplotlib=matplotlib_plotting)
 
-
-# TODO play with t1, t2
-
 cv2.destroyAllWindows()

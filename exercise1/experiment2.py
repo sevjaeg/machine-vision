@@ -45,6 +45,7 @@ edges = non_max(gradients, orientations)
 edges2 = non_max(gradients2, orientations2)
 edges3 = non_max(gradients3, orientations3)
 
+# 2.1 & 2.2
 low = 0.1
 high = 0.1
 for i in range(4):
@@ -62,6 +63,7 @@ for i in range(4):
     low += 0.2
     high = low
 
+# 2.3
 low = 0.1
 high = 0.3
 for i in range(3):
