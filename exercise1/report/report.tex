@@ -58,7 +58,7 @@
 
 \section{Experiment 1}
 
-The first experiment deals with the Gaussian blurring and in particular the influence of its parameter $\sigma$. The input image for this experiment is shown in Figure \ref{image_lady}.
+The first experiment is concerned with the Gaussian blurring and in particular the influence of its parameter $\sigma$. The input image for this experiment is shown in Figure \ref{image_lady}.
 
 \begin{figure} [h!]
 \includegraphics[width=4cm]{ex1_lady/pos400.png}
@@ -75,10 +75,9 @@ W_{kernel} =  2 \cdot \textrm{round}(3 \sigma) + 1.
 \label{w_kernel}
 \end{equation}
 
-This is beneficial because the entries of the kernel decrease very quickly with the distance from the center for small values of $\sigma$. As larger kernels increase the computational effort for the filtering operation, the runtime can be reduced in these cases by using a smaller kernel. However, larger values of $\sigma$ yield larger peaks in the Gaussian distribution, so a larger kernel is required for precise filtering.
+This is beneficial because the entries of the kernel decrease very quickly with the distance from the center for small values of $\sigma$. As larger kernels increase the computational effort for the filtering operation, the runtime can be reduced in these cases by using a smaller kernel. However, larger values of $\sigma$ yield wider peaks in the Gaussian distribution, so a larger kernel is required for precise filtering.
 
-% TODO why do the effects occur?
-Figure \ref{kernel_sigma} compares different kernel widths with $\sigma=3$. It is apparent, that small kernels are insufficient to represent the whole filter, so the smoothing effect is significantly reduced. When it comes to smaller values of $\sigma$, this effect becomes less influential. For $\sigma=1$, there is hardly any difference between $W_{kernel} = 3$ and $W_{kernel} = 7$ (which is the value obtained from Equation \ref{w_kernel}) observable.
+Figure \ref{kernel_sigma} compares different kernel widths with $\sigma=3$. It is apparent that small kernels are insufficient to represent the whole filter, so the smoothing effect is significantly reduced. When it comes to smaller values of $\sigma$, this effect becomes less influential. For $\sigma=1$, there is hardly any difference between $W_{kernel} = 3$ and $W_{kernel} = 7$ (which is the value obtained from Equation \ref{w_kernel}) observable.
 
 \begin{figure} [h!]
 \begin{subfigure}[b]{0.3\textwidth}
@@ -137,7 +136,7 @@ Figure \ref{pixel_intensities} compares the pixel intensities in a row of the or
 
 \subsection{Effect of blurring on non-maximum suppression}
 
-Figure \ref{non_maximum} displays the result of the non-maximum suppression algorithm with differently filtered input images. Less Gaussian blurring tends to yield images with more edges, while stronger filtering (higher values of $\sigma$) eliminates noise and the less significant edges and results in images consisting of the most significant edges. This is reasonable, as the Sobel filter amplifies noise, which is cancelled by Gaussian blurring. Furthermore, stronger filtering reduces the intensity of the remaining edges.
+Figure \ref{non_maximum} displays the results of the non-maximum suppression algorithm with differently filtered input images. Less Gaussian blurring tends to yield images with more edges, while stronger filtering (higher values of $\sigma$) eliminates noise and the less significant edges and results in images consisting of the most significant edges. This is reasonable, as the Sobel filter amplifies noise, which is cancelled by Gaussian blurring. Furthermore, stronger filtering reduces the intensity of the remaining edges.
 
 \begin{figure} [h!]
 \begin{subfigure}[b]{0.22\textwidth}
