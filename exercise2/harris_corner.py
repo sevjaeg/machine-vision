@@ -3,8 +3,8 @@
 
 """ Corner detection with the Harris corner detector
 
-Author: FILL IN
-MatrNr: FILL IN
+Author: Severin Jäger
+MatrNr: 01613004
 """
 import numpy as np
 import cv2
@@ -47,8 +47,84 @@ def harris_corner(img, sigma1, sigma2, k, threshold):
     """
 
     ######################################################
-    # Write your own code here
-    output = np.ones(img.shape)  # Replace these lines
-    return output, output, output, output, output, output, output, output, output
+    # Creating DoG
+    kernel_width1 = 2 * round(3 * sigma1) + 1
+    kernel1 = cv2.getGaussianKernel(kernel_width1, sigma1)
+    gauss1 = np.outer(kernel1, kernel1.transpose())
+    dog_x = np.gradient(gauss1, axis=1)
+    dog_y = np.gradient(gauss1, axis=0)
 
+    # Applying DoG
+    i_x = cv2.filter2D(img, -1, dog_x, borderType=cv2.BORDER_REPLICATE)
+    i_y = cv2.filter2D(img, -1, dog_y, borderType=cv2.BORDER_REPLICATE)
+    i_xx = np.square(i_x)
+    i_yy = np.square(i_y)
+    i_xy = np.multiply(i_x, i_y)
+
+    # Gaussian blurring
+    kernel_width2 = 2 * round(3 * sigma2) + 1
+    kernel2 = cv2.getGaussianKernel(kernel_width2, sigma2)
+    gauss2 = np.outer(kernel2, kernel2.transpose())
+    g_xx = cv2.filter2D(i_xx, -1, gauss2, borderType=cv2.BORDER_REPLICATE)
+    g_yy = cv2.filter2D(i_yy, -1, gauss2, borderType=cv2.BORDER_REPLICATE)
+    g_xy = cv2.filter2D(i_xy, -1, gauss2, borderType=cv2.BORDER_REPLICATE)
+
+    # Calculating Harris features
+    # For a 2x2 matrix M = [[a,b],[c,d]] the following relations hold:
+    #   det(M) = a*d-b=c
+    #   trace(M) = a+d
+    # This simplifications yield the following line:
+    r = np.multiply(g_xx, g_yy) - np.square(g_xy) - k * np.square(g_xx + g_yy)
+
+    # Normalisation and thresholding
+    r = r / np.max(r)
+    r = np.where(r >= threshold, r, 0)
+
+    # Non-maximum suppression
+    r_non_max = non_max(r)
+
+    # Collect corner points
+    corners = np.argwhere(r_non_max == 1)
+    corners_final = np.zeros((corners.shape[0], 3))
+    corners_final[:, [0, 1]] = corners
+
+    corners_final[:, 2] = r[corners_final[:, 0].astype(int), corners_final[:, 1].astype(int)]
+
+    print(corners_final)
+    print("Found {:d} corners".format(corners_final.shape[0]))
+
+    return i_xx, i_yy, i_xy, g_xx, g_yy, g_xy, r, r_non_max, corners
     ######################################################
+
+
+def non_max(corners: np.array) -> np.array:
+    """ Apply Non-Maxima Suppression and return an corner image.
+
+    Filter out all the values of the corners array which are not local maxima.
+
+    :param corners: Harris corner strength of the image in range [0.,1.]
+    :type corners: np.array with shape (height, width) with dtype = np.float32 and values in the range [0., 1.]
+
+    :return: Non-Maxima suppressed corners
+    :rtype: np.array with shape (height, width) with dtype = np.float32 and values in the range [0., 1.]
+    """
+    ######################################################
+    print("Performing non-maximum suppression")
+
+    corners_e = np.roll(corners, axis=0, shift=-1)              # corners(x+1,y)
+    corners_ne = np.roll(corners, axis=(0, 1), shift=(-1, -1))  # corners(x+1,y+1)
+    corners_n = np.roll(corners, axis=1, shift=-1)              # corners(x,y+1)
+    corners_nw = np.roll(corners, axis=(0, 1), shift=(1, -1))   # corners(x-1,y+1)
+    corners_w = np.roll(corners, axis=0, shift=1)               # corners(x-1,y)
+    corners_sw = np.roll(corners, axis=(0, 1), shift=(1, 1))    # corners(x-1,y-1)
+    corners_s = np.roll(corners, axis=1, shift=1)               # corners(x,y-1)
+    corners_se = np.roll(corners, axis=(0, 1), shift=(-1, 1))   # corners(x+1,y-1)
+
+    # 1 if greater than all neighbours, 0 otherwise
+    # >= treat the case of two neighbouring pixels with the same strength
+    corners_non_max = np.where(np.logical_and(corners >= corners_e, np.logical_and(corners >= corners_ne,
+                            np.logical_and(corners >= corners_n, np.logical_and(corners >= corners_nw,
+                            np.logical_and(corners > corners_w, np.logical_and(corners > corners_sw,
+                            np.logical_and(corners > corners_s, corners > corners_se))))))), 1, 0)
+    ######################################################
+    return corners_non_max
