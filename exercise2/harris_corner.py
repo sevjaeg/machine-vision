@@ -90,9 +90,7 @@ def harris_corner(img, sigma1, sigma2, k, threshold):
 
     corners_final[:, 2] = r[corners_final[:, 0].astype(int), corners_final[:, 1].astype(int)]
 
-    print(corners_final)
     print("Found {:d} corners".format(corners_final.shape[0]))
-
     return i_xx, i_yy, i_xy, g_xx, g_yy, g_xy, r, r_non_max, corners
     ######################################################
 
@@ -109,8 +107,6 @@ def non_max(corners: np.array) -> np.array:
     :rtype: np.array with shape (height, width) with dtype = np.float32 and values in the range [0., 1.]
     """
     ######################################################
-    print("Performing non-maximum suppression")
-
     corners_e = np.roll(corners, axis=0, shift=-1)              # corners(x+1,y)
     corners_ne = np.roll(corners, axis=(0, 1), shift=(-1, -1))  # corners(x+1,y+1)
     corners_n = np.roll(corners, axis=1, shift=-1)              # corners(x,y+1)

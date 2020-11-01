@@ -24,9 +24,8 @@ def patch_basic(patch: np.ndarray) -> np.ndarray:
     :rtype: np.ndarray with shape (1, patch_size^2)
     """
     ######################################################
-    # Write your own code here
-    return np.zeros((1, patch.size))  # Replace this line
-
+    # quadratic matrix to vector
+    return np.reshape(patch, (1, patch.size))
     ######################################################
 
 
@@ -40,9 +39,9 @@ def patch_norm(patch: np.ndarray) -> np.ndarray:
     :rtype: np.ndarray with shape (1, patch_size^2)
     """
     ######################################################
-    # Write your own code here
-    return np.zeros((1, patch.size))  # Replace this line
-
+    desc = patch_basic(patch)
+    desc = desc / np.max(desc)
+    return desc
     ######################################################
 
 
@@ -56,9 +55,7 @@ def patch_sort(patch: np.ndarray) -> np.ndarray:
     :rtype: np.ndarray with shape (1, patch_size^2)
     """
     ######################################################
-    # Write your own code here
-    return np.zeros((1, patch.size))  # Replace this line
-
+    return np.sort(patch_norm(patch))
     ######################################################
 
 
@@ -72,9 +69,8 @@ def patch_sort_circle(patch: np.ndarray) -> np.ndarray:
     :rtype: np.ndarray with shape (1, patch_size^2)
     """
     ######################################################
-    # Write your own code here
-    return np.zeros((1, patch.size))  # Replace this line
-
+    patch = np.where(circle_mask(patch.shape[0]), patch, 0)
+    return patch_sort(patch)
     ######################################################
 
 
@@ -92,8 +88,24 @@ def block_orientations(patch: np.ndarray) -> np.ndarray:
     :rtype: np.ndarray with shape (1, 128)
     """
     ######################################################
-    # Write your own code here
-    return np.zeros((1, 128))  # Replace this line
+    dx, dy = np.gradient(patch)
+    grad = np.sqrt(np.square(dx) + np.square(dy))
+    orientations = np.arctan2(dy, dx)
+
+    hist = np.zeros((1, 0))
+    for x in range(4):
+        for y in range(4):
+            #block = patch[4*x:4*x+4, 4*y:4*y+4]
+            grad_block = grad[4*x:4*x+4, 4*y:4*y+4]
+            orientations_block = orientations[4*y:4*y+4, 4*y:4*y+4]
+            bins = np.array([-np.pi, -3/4*np.pi, -1/2*np.pi, -1/4*np.pi, 0, 1/4*np.pi, 1/2*np.pi, 3/4*np.pi])
+            orientations_binned = np.digitize(orientations_block, bins)
+            h = np.zeros((1, 8))
+            for i in range(bins.size):
+                orientations_i = np.multiply(np.where(orientations_binned == i+1, 1, 0), grad_block)
+                h[0, i] = np.sum(orientations_i)
+            hist = np.hstack((hist, h))
+    return hist
 
     ######################################################
 
@@ -126,7 +138,32 @@ def compute_descriptors(descriptor_func: Callable,
     :rtype: (np.ndarray, np.ndarray)
     """
     ######################################################
-    # Write your own code here
-    return np.zeros((10, 2)), np.zeros((10, patch_size*patch_size))  # Replace this line
+    x_max = img.shape[0]
+    y_max = img.shape[1]
 
+    interest_points = np.zeros((1, 2))
+    width = patch_size*patch_size
+    if descriptor_func == block_orientations:
+        width = 128
+    descriptors = np.zeros((1, width))
+    for location in locations:
+        x = location[0]
+        y = location[1]
+        if patch_size % 2 == 0:
+            d1 = int((patch_size - 1) / 2)
+            d2 = int((patch_size - 1) / 2) + 1
+        else:
+            d1 = int((patch_size - 1) / 2)
+            d2 = d1
+        if (x-d1) > 0 and (x+d2) < x_max and (y-d1) > 0 and (y+d2) < y_max:
+            patch = img[x-d1:x+d2+1, y-d1:y+d2+1]
+            descriptor = descriptor_func(patch)
+            interest_points = np.vstack((interest_points, np.array([x, y])))
+            descriptors = np.vstack((descriptors, descriptor))
+
+    interest_points = interest_points[1:, :]
+    descriptors = descriptors[1:, :]
+
+    return interest_points, descriptors
     ######################################################
+
