@@ -16,6 +16,9 @@ from harris_corner import harris_corner
 from helper_functions import *
 from match_descriptors import *
 
+# additonal import for time measurement
+import time
+
 if __name__ == '__main__':
     save_image = False  # Enables saving of matches image
     img_path_1 = 'desk/Image-00.jpg'  # Try different images
@@ -53,6 +56,8 @@ if __name__ == '__main__':
 
     descriptor_func = descriptor_funcs[descriptor_func_ind]
 
+    start = time.time()
+
     # Harris corner detector
     _, _, _, _, _, _, _, _, corners = harris_corner(img_gray_1, sigma1=sigma1, sigma2=sigma2, threshold=threshold, k=k)
 
@@ -67,6 +72,10 @@ if __name__ == '__main__':
 
     # Match descriptors
     matches = match_descriptors(descriptors_1, descriptors_2, best_only=True)
+
+    end = time.time()
+    span = end - start
+    print("{:.0f} ms".format(1000 * span))
 
     # Display results
     show_matches(img_gray_1, img_gray_2, interest_points_1, interest_points_2, matches, save_image=save_image)

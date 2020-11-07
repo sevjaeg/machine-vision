@@ -23,8 +23,8 @@ if __name__ == '__main__':
     img_file = 'desk/Image-00.jpg'
 
     # parameters <<< try different settings!
-    sigma1 = 0.8  # 1
-    sigma2 = 1.5
+    sigma1 = 1
+    sigma2 = 2
     k = 0.04
     threshold = 0.01
 

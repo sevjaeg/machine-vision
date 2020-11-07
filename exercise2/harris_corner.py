@@ -70,10 +70,11 @@ def harris_corner(img, sigma1, sigma2, k, threshold):
     g_xy = cv2.filter2D(i_xy, -1, gauss2, borderType=cv2.BORDER_REPLICATE)
 
     # Calculating Harris features
+    # R is defined as R = det(M) - k * trace(M)^2
     # For a 2x2 matrix M = [[a,b],[c,d]] the following relations hold:
     #   det(M) = a*d-b=c
     #   trace(M) = a+d
-    # This simplifications yield the following line:
+    # These simplifications yield the following line:
     r = np.multiply(g_xx, g_yy) - np.square(g_xy) - k * np.square(g_xx + g_yy)
 
     # Normalisation and thresholding
@@ -85,9 +86,10 @@ def harris_corner(img, sigma1, sigma2, k, threshold):
 
     # Collect corner points
     corners = np.argwhere(r_non_max == 1)
+    # non_max returns binary values -> corners holds all coordinates of interest points
     corners_final = np.zeros((corners.shape[0], 3))
     corners_final[:, [0, 1]] = corners
-
+    # additional column for corner strength (from non-binary matrix r)
     corners_final[:, 2] = r[corners_final[:, 0].astype(int), corners_final[:, 1].astype(int)]
 
     print("Found {:d} corners".format(corners_final.shape[0]))
@@ -117,7 +119,7 @@ def non_max(corners: np.array) -> np.array:
     corners_se = np.roll(corners, axis=(0, 1), shift=(-1, 1))   # corners(x+1,y-1)
 
     # 1 if greater than all neighbours, 0 otherwise
-    # >= treat the case of two neighbouring pixels with the same strength
+    # >= treat the case of two neighbouring pixels with the same strength (otherwise none of them is detected as corner)
     corners_non_max = np.where(np.logical_and(corners >= corners_e, np.logical_and(corners >= corners_ne,
                             np.logical_and(corners >= corners_n, np.logical_and(corners >= corners_nw,
                             np.logical_and(corners > corners_w, np.logical_and(corners > corners_sw,

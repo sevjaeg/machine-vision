@@ -37,7 +37,7 @@
 
 
 \title{376.054 Machine Vision and Cognitive Robotics\\
-	   Exercise 1: Interest Points and Descriptors}
+	   Exercise 2: Interest Points and Descriptors}
 \author{
   Severin Jäger, 01613004
 }
@@ -56,20 +56,26 @@
 \tableofcontents
 \pagebreak
 
-\section{Experiment 1}
+\section{Experiment 1: Detection of Interest Points}
 \subsection{Influence of $\sigma$}
+% reduces noise -> less corners detected
+% too large sigma -> exact position of corners lost (offset might emerge)
+
 \subsection{Influence of second blurring step}
-\subsection{}
-\subsection{}
-\subsection{}
+% sigma represents the width of the window function
+% plot dependency found corners(sigma) -> high for low values (ambiguous), low for very high values (below threshold)
+
+\subsection{Lacking scale invariance}
+\subsection{Limitations of scale variant detectors}
+\subsection{Influence of $k$}
 \clearpage
-\section{Experiment 2}
-\subsection{}
-\subsection{}
-\subsection{}
-\subsection{}
-\subsection{}
-\subsection{}
-\subsection{}
+\section{Experiment 2: Matching of Interest Points}
+\subsection{Impact of the patch size}
+\subsection{Impact of rotation}
+\subsection{Normalised descriptor}
+\subsection{Sorted descriptor}
+\subsection{Block descriptor}
+\subsection{Advantages of the histogram method}
+\subsection{Discussion of blocks within the patch}
 
 \end{document}
