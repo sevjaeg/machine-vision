@@ -96,19 +96,22 @@ def block_orientations(patch: np.ndarray) -> np.ndarray:
     # 8 bins of the histogram
     bins = np.array(
         [-np.pi, -3 / 4 * np.pi, -1 / 2 * np.pi, -1 / 4 * np.pi, 0, 1 / 4 * np.pi, 1 / 2 * np.pi, 3 / 4 * np.pi])
+    orientations_binned = np.digitize(orientations, bins)
 
     hist = np.zeros((1, 0))
     for x in range(4):
         for y in range(4):
-            #block = patch[4*x:4*x+4, 4*y:4*y+4]
-            grad_block = grad[4*x:4*x+4, 4*y:4*y+4]
-            orientations_block = orientations[4*y:4*y+4, 4*y:4*y+4]
-            orientations_binned = np.digitize(orientations_block, bins)
-            h = np.zeros((1, 8))
+            grad_block = grad[4 * x:4 * x + 4, 4 * y:4 * y + 4]
+            binned = orientations_binned[4*x:4*x+4, 4*y:4*y+4]
+            h = np.zeros((1, bins.size))
             for i in range(bins.size):
                 # histogram weight = gradient (achieved by multiplication)
-                orientations_i = np.multiply(np.where(orientations_binned == i+1, 1, 0), grad_block)
+                orientations_i = np.multiply(np.where(binned == i+1, 1, 0), grad_block)
+                # reduce orientations_i matrix
                 h[0, i] = np.sum(orientations_i)
+            h_max = np.max(h)
+            if h_max != 0.0:
+                h = h / h_max
             hist = np.hstack((hist, h))
     return hist
 

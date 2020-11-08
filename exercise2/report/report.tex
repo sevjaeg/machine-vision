@@ -71,6 +71,8 @@ This experiment deals with interest point detection using the Harris Corner Dete
 
 The first blurring step determines the width of the derivative-of-Gaussian operator and therefore the thickness of the detected edges. As higher values of $\sigma_1$ yield thicker edges, the maximum intensity values decrease. As the threshold $t$ remains unaltered, weaker corners are not detected any longer. This claim is supported by Figure \ref{corners_vs_sigma1}, which indicates a roughly linear decrease of detected corners with increasing $\sigma_1$.
 
+Another interesting aspect is that high values of $\sigma_1$ lead to a offset between the corner and the detected interest point. This is due to the smoothing which leads to wide edges. In the following, the non-maximum suppression might select a different position for the corner.
+
 \begin{figure} [h!]
 \includegraphics[width=9cm]{ex1_1_plot}
 \centering
@@ -78,10 +80,8 @@ The first blurring step determines the width of the derivative-of-Gaussian opera
 \label{corners_vs_sigma1}
 \end{figure}
 
-%TODO too large sigma -> exact position of corners lost (offset might emerge)
-
 \subsection{Influence of second blurring step}
-The parameter $\sigma_2$ represents the width of the Gaussian window function in the Harris Detector. Narrow window functions tend to yield noisy values of the autocorrelation, higher values of $\sigma_2$ tend to eliminate noise and yield only more significant corners. Figure \ref{corners_vs_sigma2} shows this behaviour exemplarily.
+The parameter $\sigma_2$ represents the width of the Gaussian window function in the Harris Detector. Narrow window functions tend to yield noisy values of the autocorrelation, higher values of $\sigma_2$ tend to eliminate noise and yield only more significant corners. Figure \ref{corners_vs_sigma2} shows this behaviour exemplarily. As described in the previous section, small offsets appear for high values of $\sigma_2$ as well.
 
 \begin{figure} [h!]
 \begin{subfigure}[b]{\textwidth}
@@ -99,8 +99,6 @@ The parameter $\sigma_2$ represents the width of the Gaussian window function in
 \caption{Detected corners for different values of $\sigma_2$ with $\sigma_1 = 1$, $k = 0.04$, $t = 0.01$.}
 \label{corners_vs_sigma2}
 \end{figure}
-
-%TODO again offsetting 
 
 \clearpage
 

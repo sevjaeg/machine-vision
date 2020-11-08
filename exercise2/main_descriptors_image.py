@@ -28,8 +28,8 @@ if __name__ == '__main__':
     img_path_2 = 'desk/Image-03.jpg'
 
     # parameters <<< try different settings!
-    sigma1 = 1
-    sigma2 = 2
+    sigma1 = 0.8
+    sigma2 = 1.5
     threshold = 0.01
     k = 0.04
     patch_size = 11
