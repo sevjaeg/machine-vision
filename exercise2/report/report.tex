@@ -57,25 +57,241 @@
 \pagebreak
 
 \section{Experiment 1: Detection of Interest Points}
-\subsection{Influence of $\sigma$}
-% reduces noise -> less corners detected
-% too large sigma -> exact position of corners lost (offset might emerge)
+	
+This experiment deals with interest point detection using the Harris Corner Detector. The input image used for this experiment is shown in Figure \ref{desk}.
+
+\begin{figure} [h!]
+\includegraphics[width=7cm]{desk.png}
+\centering
+\caption{Input image for experiment 1.}
+\label{desk}
+\end{figure}
+
+\subsection{Influence of $\sigma_1$}
+
+The first blurring step determines the width of the derivative-of-Gaussian operator and therefore the thickness of the detected edges. As higher values of $\sigma_1$ yield thicker edges, the maximum intensity values decrease. As the threshold $t$ remains unaltered, weaker corners are not detected any longer. This claim is supported by Figure \ref{corners_vs_sigma1}, which indicates a roughly linear decrease of detected corners with increasing $\sigma_1$.
+
+\begin{figure} [h!]
+\includegraphics[width=9cm]{ex1_1_plot}
+\centering
+\caption{Number of detected corners as function of the blurring parameter $\sigma_1$ with $\sigma_2 = 2$, $k = 0.04$, $t = 0.01$.}
+\label{corners_vs_sigma1}
+\end{figure}
+
+%TODO too large sigma -> exact position of corners lost (offset might emerge)
 
 \subsection{Influence of second blurring step}
-% sigma represents the width of the window function
-% plot dependency found corners(sigma) -> high for low values (ambiguous), low for very high values (below threshold)
+The parameter $\sigma_2$ represents the width of the Gaussian window function in the Harris Detector. Narrow window functions tend to yield noisy values of the autocorrelation, higher values of $\sigma_2$ tend to eliminate noise and yield only more significant corners. Figure \ref{corners_vs_sigma2} shows this behaviour exemplarily.
+
+\begin{figure} [h!]
+\begin{subfigure}[b]{\textwidth}
+\centering
+\includegraphics[width=11cm]{ex1_2s025.png}
+\centering
+\subcaption{$\sigma_2=0.25$}
+\end{subfigure}
+\begin{subfigure}[b]{\textwidth}
+\centering
+\includegraphics[width=11cm]{ex1_2s3.png}
+\subcaption{$\sigma_2=3$}
+\end{subfigure}
+\centering
+\caption{Detected corners for different values of $\sigma_2$ with $\sigma_1 = 1$, $k = 0.04$, $t = 0.01$.}
+\label{corners_vs_sigma2}
+\end{figure}
+
+%TODO again offsetting 
+
+\clearpage
 
 \subsection{Lacking scale invariance}
+
+Figure \ref{scale_issue} gives an example of the Harris Detector applied to the same image at different scales. It becomes apparent that several corners are not detected any longer once the resolution decreases.
+
+\begin{figure} [h!]
+\begin{subfigure}[b]{0.35\textwidth}
+\centering
+\includegraphics[width=7cm]{ex1_3a_det.png}
+\centering
+\subcaption{$320 \times 240$ pixels}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.35\textwidth}
+\centering
+\includegraphics[width=7cm]{ex1_3b_det.png}
+\subcaption{$160 \times 120$ pixels}
+\end{subfigure}
+\centering
+\caption{Detected corners within the same section of a differently scaled input image with $\sigma_1 = 1$, $\sigma_2 = 3$, $k = 0.04$, $t = 0.01$. Note that a different input image was used for this experiment.}
+\label{scale_issue}
+\end{figure}
+
 \subsection{Limitations of scale variant detectors}
+Scale invariance is a desired property of many machine vision algorithms. For instance, an autonomous robot might scan its surroundings with cameras and use interest points to detect obstacles or objects to interact with. As the distances towards these objects differ, detection of interest points in differently scaled images is desirable. Only in special applications with constant distances (such as quality inspection systems), scale variant detectors are acceptable.
+
 \subsection{Influence of $k$}
+The parameter $k$ shifts the exact positions of the detected corners slightly. Increased values tend do remove duplicate (or very close nearby) corners and to increase the precision of the corner localisation. However, the overall impact of $k$ is way smaller than the impact of $\sigma_2$. For large values of $k$ ($>0.25$), the detector does not work any longer.
+
+%TODO images (0.04 & 0.1)?
+
 \clearpage
 \section{Experiment 2: Matching of Interest Points}
+This experiment is concerned with matching of interest points which were calculated using the Harris detector from the previous section. For all pictures shown in the following the parameters $\sigma_1 = 1$, $\sigma_2 = 2$, $k = 0.04$ and $t = 0.01$ were used.
+
 \subsection{Impact of the patch size}
+\label{sec:patch}
+The patch size of the basic descriptor is a crucial parameter for the quality of the matching algorithm. High values increase the quality as well as the number of matches (as the ambiguity decreases), however the computational effort rises as well. This behaviour can be observed in Figure \ref{patch_size}.
+
+\begin{figure} [h]
+\begin{subfigure}[b]{\textwidth}
+\centering
+\includegraphics[width=12cm,trim={0.4cm 3cm 0.3cm 3cm},clip]{ex2_1_3.png}
+\centering
+\subcaption{$W_{patch} = 3$ yielding $38$ matches}
+\end{subfigure}
+\begin{subfigure}[b]{\textwidth}
+\centering
+\includegraphics[width=12cm,trim={0.4cm 3cm 0.3cm 3cm},clip]{ex2_1_11.png}
+\subcaption{$W_{patch} = 11$ yielding $72$ matches}
+\end{subfigure}
+\centering
+\caption{Matching using the basic descriptor with different patch sizes $W_{patch}$.}
+\label{patch_size}
+\end{figure}
+
 \subsection{Impact of rotation}
+\label{sec:rot}
+Rotation is a major challenge for matching. Figure \ref{rotation} depicts the response of the basic descriptor matching for different rotations. Small rotations (around \SI{10}{\degree}) do not deteriorate the performance significantly, however for larger angles (around \SI{30}{\degree}) the matching does not work any longer. This is reasonable, as the descriptor uses the intensities of the neighbouring pixels, in case of rotations those are at a different position.
+
+\begin{figure} [h!]
+\begin{subfigure}[b]{\textwidth}
+\centering
+\includegraphics[width=12cm,trim={0.4cm 2.9cm 0.3cm 2.9cm},clip]{ex2_2_10.png}
+\centering
+\subcaption{\SI{10}{\degree}}
+\end{subfigure}
+\begin{subfigure}[b]{\textwidth}
+\centering
+\includegraphics[width=12cm,trim={0.4cm 2.5cm 0.3cm 2.5cm},clip]{ex2_2_20.png}
+\subcaption{\SI{20}{\degree}}
+\end{subfigure}
+\begin{subfigure}[b]{\textwidth}
+\centering
+\includegraphics[width=12cm,trim={0.4cm 2.2cm 0.3cm 2.2cm},clip]{ex2_2_30.png}
+\subcaption{\SI{30}{\degree}}
+\end{subfigure}
+\centering
+\caption{Matching using one rotated input image. The images are identical to the ones used in Figure \ref{patch_size}, $W_{patch}$ is 11.}
+\label{rotation}
+\end{figure}
+
+\clearpage
 \subsection{Normalised descriptor}
+The normalised descriptor is helpful with different lighting conditions. This behaviour can be observed in Figure \ref{norm}. This is due to the fact that changing light conditions imply different behaviour of the gradients, therefore the values of the neighbouring pixels diverge. Nonetheless, their relations are still similar, so normalising mitigates this problem.
+
+\begin{figure} [h!]
+\begin{subfigure}[b]{\textwidth}
+\centering
+\includegraphics[width=12cm,trim={0.4cm 3cm 0.3cm 3cm},clip]{ex2_3_basic.png}
+\centering
+\subcaption{Identical light with basic descriptor}
+\end{subfigure}
+\begin{subfigure}[b]{\textwidth}
+\centering
+\includegraphics[width=12cm,trim={0.4cm 3cm 0.3cm 3cm},clip]{ex2_3_different.png}
+\subcaption{Different light with basic descriptor}
+\end{subfigure}
+\begin{subfigure}[b]{\textwidth}
+\centering
+\includegraphics[width=12cm,trim={0.4cm 3cm 0.3cm 3cm},clip]{ex2_3_norm.png}
+\subcaption{Different light with normalised descriptor}
+\end{subfigure}
+\centering
+\caption{Different light conditions with basic and normalised descriptor with  $W_{patch} = 11$.}
+\label{norm}
+\end{figure}
+
+\begin{figure}
+\begin{subfigure}[b]{\textwidth}
+\centering
+\includegraphics[width=12cm,trim={0.4cm 2.2cm 0.3cm 2.2cm},clip]{ex2_4_30.png}
+\centering
+\subcaption{\SI{30}{\degree} with sorted descriptor}
+\end{subfigure}
+\begin{subfigure}[b]{\textwidth}
+\centering
+\includegraphics[width=12cm,trim={0.4cm 1.75cm 0.3cm 1.75cm},clip]{ex2_4_40.png}
+\subcaption{\SI{40}{\degree} with sorted descriptor}
+\end{subfigure}
+\begin{subfigure}[b]{\textwidth}
+\centering
+\includegraphics[width=12cm,trim={0.4cm 1.75cm 0.3cm 1.75cm},clip]{ex2_4_40_circ.png}
+\subcaption{\SI{40}{\degree} with circular sorted descriptor}
+\end{subfigure}
+\centering
+\caption{Matching of rotated images using the sorted descriptor with $W_{patch} = 11$.}
+\label{circular}
+\end{figure}
+
+\clearpage
 \subsection{Sorted descriptor}
+The aim of the sorted descriptor is the alleviation of the rotation issues discussed in Section \ref{sec:rot}. Figure \ref{circular} shows the resulting images. With the circular descriptor the number of matches is significantly increased (in comparison to the circular descriptor in Figure \ref{rotation}), however the quality of the matches remains unsatisfactory. The circular sorted descriptor is another a slight improvement. This is because the pixels in the corner of the (quadratic) patches are shifted out of or into the patch while rotation. This is not the case for pixels inside the circle.
+
 \subsection{Block descriptor}
+The block descriptor is doubtlessly the most powerful descriptor used in this experiment. It yields excellent matching results for shifted images (s. Figures \ref{offset} and \ref{block_normal}) and outperforms the normalized descriptor in presence of different light conditions (s. Figure \ref{block_light}). However, it does not perform well with rotates images (s. Figure \ref{block_rotation}). This is due to the internal use of directions. For rotations significantly below the  histogram bin width (\SI{45}{\degree}), the results are satisfactory, nonetheless.
+
+\begin{figure}
+\begin{subfigure}[b]{\textwidth}
+\centering
+\includegraphics[width=12cm,trim={0.4cm 3cm 0.3cm 3cm},clip]{ex2_5_2a.png}
+\subcaption{Normal descriptor with $W_{patch} = 11$}.
+\end{subfigure}
+\begin{subfigure}[b]{\textwidth}
+\centering
+\includegraphics[width=12cm,trim={0.4cm 3cm 0.3cm 3cm},clip]{ex2_5_2b.png}
+\subcaption{Block descriptor}
+\end{subfigure}
+\centering
+\caption{Matching of pictures with more significant offset with different descriptors.}
+\label{offset}
+\end{figure}
+
+\begin{figure}
+\begin{subfigure}[b]{\textwidth}
+\centering
+\includegraphics[width=12cm,trim={0.4cm 3cm 0.3cm 3cm},clip]{ex2_5_normal.png}
+\centering
+\subcaption{Normal matching, compare to Figure \ref{patch_size}}
+\label{block_normal}
+\end{subfigure}
+\begin{subfigure}[b]{\textwidth}
+\centering
+\includegraphics[width=12cm,trim={0.4cm 2cm 0.3cm 2cm},clip]{ex2_5_rot.png}
+\centering
+\subcaption{Matching of \SI{40}{\degree} rotated images, compare to Figures \ref{rotation} and \ref{circular}}.
+\label{block_rotation}
+\end{subfigure}
+\begin{subfigure}[b]{\textwidth}
+\centering
+\includegraphics[width=12cm,trim={0.4cm 3cm 0.3cm 3cm},clip]{ex2_5_light.png}
+\subcaption{Matching of images with different light conditions, compare to Figure \ref{norm}}.
+\label{block_light}
+\end{subfigure}
+\centering
+\caption{Matching with the block descriptor in different situations.}
+\label{block}
+\end{figure}
+
+\clearpage
+
 \subsection{Advantages of the histogram method}
+The histogram method is advantageous as it increases the resilience against outliers (e.g. salt-and-pepper noise) by averaging over the blocks via the histograms. Furthermore, it is robust in the sense that it is almost invariant to small shifts. In addition, the normalisation ensures that illumination or contrast changes do not notable affect the result.
+
 \subsection{Discussion of blocks within the patch}
+The blocks within the patches mainly increase the size of the feature vector. This is helpful as it makes the distinction between different interest points clearer.
+
+%TODO ans no
+
+However, this increases the rotation variance of the descriptor as in case of a rotated image not only the direction values change, but also the block to which a pixel belongs might be altered.
 
 \end{document}

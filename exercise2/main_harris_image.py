@@ -18,13 +18,13 @@ from harris_corner import harris_corner
 from helper_functions import show_corners
 
 if __name__ == '__main__':
-    debug_corners = True  # <<< change to reduce output when you're done
-    save_image = False
+    debug_corners = False  # <<< change to reduce output when you're done
+    save_image = True
     img_file = 'desk/Image-00.jpg'
 
     # parameters <<< try different settings!
-    sigma1 = 1
-    sigma2 = 2
+    sigma1 = 0.8
+    sigma2 = 1.5
     k = 0.04
     threshold = 0.01
 
@@ -35,6 +35,8 @@ if __name__ == '__main__':
     img_gray = cv2.imread(str(current_path.joinpath(img_file)), cv2.IMREAD_GRAYSCALE)
     if img_gray is None:
         raise FileNotFoundError("Couldn't load image in " + str(current_path))
+
+    #cv2.imwrite('gray.png', img_gray)
 
     # Convert image from uint8 with range [0,255] to float32 with range [0,1]
     img_gray = img_gray.astype(np.float32) / 255.

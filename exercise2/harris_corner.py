@@ -93,7 +93,7 @@ def harris_corner(img, sigma1, sigma2, k, threshold):
     corners_final[:, 2] = r[corners_final[:, 0].astype(int), corners_final[:, 1].astype(int)]
 
     print("Found {:d} corners".format(corners_final.shape[0]))
-    return i_xx, i_yy, i_xy, g_xx, g_yy, g_xy, r, r_non_max, corners
+    return i_xx, i_yy, i_xy, g_xx, g_yy, g_xy, r, r_non_max, corners_final
     ######################################################
 
 

@@ -93,14 +93,16 @@ def block_orientations(patch: np.ndarray) -> np.ndarray:
     grad = np.sqrt(np.square(dx) + np.square(dy))
     orientations = np.arctan2(dy, dx)
 
+    # 8 bins of the histogram
+    bins = np.array(
+        [-np.pi, -3 / 4 * np.pi, -1 / 2 * np.pi, -1 / 4 * np.pi, 0, 1 / 4 * np.pi, 1 / 2 * np.pi, 3 / 4 * np.pi])
+
     hist = np.zeros((1, 0))
     for x in range(4):
         for y in range(4):
             #block = patch[4*x:4*x+4, 4*y:4*y+4]
             grad_block = grad[4*x:4*x+4, 4*y:4*y+4]
             orientations_block = orientations[4*y:4*y+4, 4*y:4*y+4]
-            # 8 bins of the histogram
-            bins = np.array([-np.pi, -3/4*np.pi, -1/2*np.pi, -1/4*np.pi, 0, 1/4*np.pi, 1/2*np.pi, 3/4*np.pi])
             orientations_binned = np.digitize(orientations_block, bins)
             h = np.zeros((1, 8))
             for i in range(bins.size):
@@ -135,7 +137,7 @@ def compute_descriptors(descriptor_func: Callable,
     :return: (interest_points, descriptors):
         interest_points: k x 2 array containing the image coordinates [y,x] of the corners.
             Locations too close to the image boundary to cut out the image patch should not be contained.
-        descriptors: k x patch_size^2 matrix containing the patch descriptors.
+        descriptors: k x <patch_size^2> matrix containing the patch descriptors.
             Each row vector stores the concatenated column vectors of the image patch around each corner.
             Corners too close to the image boundary to cut out the image patch should not be contained.
     :rtype: (np.ndarray, np.ndarray)
@@ -144,29 +146,28 @@ def compute_descriptors(descriptor_func: Callable,
     x_max = img.shape[0]
     y_max = img.shape[1]
 
-    interest_points = np.zeros((1, 2))
-    width = patch_size*patch_size
+    interest_points = np.zeros((0, 2))
     if descriptor_func == block_orientations:
         width = 128
-    descriptors = np.zeros((1, width))
-    for location in locations:  # iterate over interestp oints
-        x = location[0]
-        y = location[1]
-        if patch_size % 2 == 0:  # handle 16x16 patches by shifting the patch half a pixel to the bottom right
-            d1 = int((patch_size - 1) / 2)
-            d2 = int((patch_size - 1) / 2) + 1
-        else:
-            d1 = int((patch_size - 1) / 2)
-            d2 = d1
+    else:
+        width = patch_size * patch_size
+    if patch_size % 2 == 0:  # handle 16x16 patches by shifting the patch half a pixel to the bottom right
+        d1 = int((patch_size - 1) / 2)
+        d2 = int((patch_size - 1) / 2) + 1
+    else:
+        d1 = int((patch_size - 1) / 2)
+        d2 = d1
+
+    descriptors = np.zeros((0, width))
+    for location in locations:  # iterate over interest points
+        x = int(location[0])
+        y = int(location[1])
         # only calculate patch if all patch pixels are within the image
         if (x-d1) > 0 and (x+d2) < x_max and (y-d1) > 0 and (y+d2) < y_max:
             patch = img[x-d1:x+d2+1, y-d1:y+d2+1]
             descriptor = descriptor_func(patch)
             interest_points = np.vstack((interest_points, np.array([x, y])))  # add element
             descriptors = np.vstack((descriptors, descriptor))  # add element
-
-    interest_points = interest_points[1:, :]  # remove the first element (created before the loop)
-    descriptors = descriptors[1:, :]  # remove the first element (created before the loop)
 
     return interest_points, descriptors
     ######################################################

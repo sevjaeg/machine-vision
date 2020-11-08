@@ -16,20 +16,23 @@ from harris_corner import harris_corner
 from helper_functions import *
 from match_descriptors import *
 
-# additonal import for time measurement
+# additional import for time measurement
 import time
 
 if __name__ == '__main__':
-    save_image = False  # Enables saving of matches image
+    save_image = True  # Enables saving of matches image
+
+    # ship: 1&3
+    # books: 2&3
     img_path_1 = 'desk/Image-00.jpg'  # Try different images
-    img_path_2 = 'desk/Image-01.jpg'
+    img_path_2 = 'desk/Image-03.jpg'
 
     # parameters <<< try different settings!
-    sigma1 = 0.8
-    sigma2 = 1.5
+    sigma1 = 1
+    sigma2 = 2
     threshold = 0.01
     k = 0.04
-    patch_size = 5
+    patch_size = 11
 
     current_path = Path(__file__).parent
     img_gray_1 = cv2.imread(str(current_path.joinpath(img_path_1)), cv2.IMREAD_GRAYSCALE)
@@ -43,6 +46,9 @@ if __name__ == '__main__':
     # Convert images from uint8 with range [0,255] to float32 with range [0,1]
     img_gray_1 = img_gray_1.astype(np.float32) / 255.
     img_gray_2 = img_gray_2.astype(np.float32) / 255.
+
+    # Rotation (if applicable)
+    #img_gray_2 = rotate_bound(img_gray_2, 30)
 
     # Choose which descriptor to use by indexing into the cell array
     descriptor_func_ind = 4

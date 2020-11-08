@@ -26,7 +26,10 @@ def match_descriptors(descriptors_1: np.ndarray, descriptors_2: np.ndarray, best
     :rtype: np.ndarray with shape (k, 2) with k being the number of matches
     """
     ######################################################
-    matches = np.zeros((1, 2))
+
+    # I did not use best_only, as its meaning is not clearly specified for me (and its not used by the calling function)
+
+    matches = np.zeros((0, 2))
     for i, desc1 in enumerate(descriptors_1):
         best_idx = 0
         dist1 = np.finfo(np.float32).max
@@ -41,7 +44,6 @@ def match_descriptors(descriptors_1: np.ndarray, descriptors_2: np.ndarray, best
                 dist2 = dist
         if dist1/dist2 < 0.8:
             matches = np.vstack((matches, np.array([i, best_idx])))
-    matches = matches[1:, :]
     print("Found {:d} matches".format(matches.shape[0]))
     return matches
     ######################################################
