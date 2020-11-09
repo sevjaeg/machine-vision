@@ -58,7 +58,7 @@
 
 \section{Experiment 1: Detection of Interest Points}
 	
-This experiment deals with interest point detection using the Harris Corner Detector. The input image used for this experiment is shown in Figure \ref{desk}.
+This experiment deals with interest point detection using the Harris corner detector. The input image used for this experiment is shown in Figure \ref{desk}.
 
 \begin{figure} [h!]
 \includegraphics[width=7cm]{desk.png}
@@ -81,7 +81,7 @@ Another interesting aspect is that high values of $\sigma_1$ lead to a offset be
 \end{figure}
 
 \subsection{Influence of second blurring step}
-The parameter $\sigma_2$ represents the width of the Gaussian window function in the Harris Detector. Narrow window functions tend to yield noisy values of the autocorrelation, higher values of $\sigma_2$ tend to eliminate noise and yield only more significant corners. Figure \ref{corners_vs_sigma2} shows this behaviour exemplarily. As described in the previous section, small offsets appear for high values of $\sigma_2$ as well.
+The parameter $\sigma_2$ represents the width of the Gaussian window function in the Harris detector. Narrow window functions lead to noisy values of the autocorrelation, higher values of $\sigma_2$ tend to eliminate noise and yield only more significant corners. Figure \ref{corners_vs_sigma2} shows this behaviour exemplarily. As described in the previous section, small offsets appear for high values of $\sigma_2$ as well.
 
 \begin{figure} [h!]
 \begin{subfigure}[b]{\textwidth}
@@ -120,17 +120,16 @@ Figure \ref{scale_issue} gives an example of the Harris Detector applied to the 
 \subcaption{$160 \times 120$ pixels}
 \end{subfigure}
 \centering
-\caption{Detected corners within the same section of a differently scaled input image with $\sigma_1 = 1$, $\sigma_2 = 3$, $k = 0.04$, $t = 0.01$. Note that a different input image was used for this experiment.}
+\caption{Detected corners within the same section of a differently scaled input image with $\sigma_1 = 1$, $\sigma_2 = 3$, $k = 0.04$, $t = 0.01$.}
 \label{scale_issue}
 \end{figure}
 
 \subsection{Limitations of scale variant detectors}
-Scale invariance is a desired property of many machine vision algorithms. For instance, an autonomous robot might scan its surroundings with cameras and use interest points to detect obstacles or objects to interact with. As the distances towards these objects differ, detection of interest points in differently scaled images is desirable. Only in special applications with constant distances (such as quality inspection systems), scale variant detectors are acceptable.
+Scale invariance is a desired property of many machine vision algorithms. For instance, an autonomous robot might observe its surroundings with cameras and use interest points to detect obstacles or objects to interact with. As the distances towards these objects differ, detection of interest points in differently scaled images is desirable. Only in special applications with constant distances (such as quality inspection systems), scale variant detectors might be acceptable.
 
 \subsection{Influence of $k$}
-The parameter $k$ shifts the exact positions of the detected corners slightly. Increased values tend do remove duplicate (or very close nearby) corners and to increase the precision of the corner localisation. However, the overall impact of $k$ is way smaller than the impact of $\sigma_2$. For large values of $k$ ($>0.25$), the detector does not work any longer.
+The parameter $k$ shifts the positions of the detected corners slightly. Increased values tend do remove duplicate (or very close nearby) corners and to increase the precision of the corner localisation. However, the overall impact of $k$ is way smaller than the impact of $\sigma_2$. For large values of $k$ ($>0.25$), the detector does not work any longer.
 
-%TODO images (0.04 & 0.1)?
 
 \clearpage
 \section{Experiment 2: Matching of Interest Points}
@@ -159,7 +158,7 @@ The patch size of the basic descriptor is a crucial parameter for the quality of
 
 \subsection{Impact of rotation}
 \label{sec:rot}
-Rotation is a major challenge for matching. Figure \ref{rotation} depicts the response of the basic descriptor matching for different rotations. Small rotations (around \SI{10}{\degree}) do not deteriorate the performance significantly, however for larger angles (around \SI{30}{\degree}) the matching does not work any longer. This is reasonable, as the descriptor uses the intensities of the neighbouring pixels, in case of rotations those are at a different position.
+Rotation is a major challenge for matching. Figure \ref{rotation} depicts the response of the basic descriptor matching for different rotations. Small rotations (around \SI{10}{\degree}) do not deteriorate the performance significantly, however for larger angles (around \SI{30}{\degree}) the matching does not deliver satisfactory results any longer. This is reasonable, as the descriptor uses the intensities of the neighbouring pixels, in case of rotation those are at different positions.
 
 \begin{figure} [h!]
 \begin{subfigure}[b]{\textwidth}
@@ -185,7 +184,7 @@ Rotation is a major challenge for matching. Figure \ref{rotation} depicts the re
 
 \clearpage
 \subsection{Normalised descriptor}
-The normalised descriptor is helpful with different lighting conditions. This behaviour can be observed in Figure \ref{norm}. This is due to the fact that changing light conditions imply different behaviour of the gradients, therefore the values of the neighbouring pixels diverge. Nonetheless, their relations are still similar, so normalising mitigates this problem.
+The normalised descriptor is helpful with different lighting conditions. This is due to the fact that changing light conditions imply different behaviour of the gradients, therefore the values of the neighbouring pixels diverge. Nonetheless, their relations remain widely unchanged, so normalising alleviates this problem. This can be observed in Figure \ref{norm}.
 
 \begin{figure} [h!]
 \begin{subfigure}[b]{\textwidth}
@@ -236,7 +235,7 @@ The normalised descriptor is helpful with different lighting conditions. This be
 The aim of the sorted descriptor is the alleviation of the rotation issues discussed in Section \ref{sec:rot}. Figure \ref{circular} shows the resulting images. With the circular descriptor the number of matches is significantly increased (in comparison to the circular descriptor in Figure \ref{rotation}), however the quality of the matches remains unsatisfactory. The circular sorted descriptor is another a slight improvement. This is because the pixels in the corner of the (quadratic) patches are shifted out of or into the patch while rotation. This is not the case for pixels inside the circle.
 
 \subsection{Block descriptor}
-The block descriptor is doubtlessly the most powerful descriptor used in this experiment. It yields excellent matching results for shifted images (s. Figures \ref{offset} and \ref{block_normal}) and outperforms the normalized descriptor in presence of different light conditions (s. Figure \ref{block_light}). However, it does not perform well with rotates images (s. Figure \ref{block_rotation}). This is due to the internal use of directions. For rotations significantly below the  histogram bin width (\SI{45}{\degree}), the results are satisfactory, nonetheless.
+The block descriptor is doubtlessly the most powerful descriptor used in this experiment. It yields excellent matching results for shifted images (s. Figures \ref{offset} and \ref{block_normal}) and outperforms the normalized descriptor in presence of different light conditions (s. Figure \ref{block_light}). However, it does not perform well with rotated images (s. Figure \ref{block_rotation}). This is due to the internal use of directions. For rotations significantly below the  histogram bin width (\SI{45}{\degree}), the results are satisfactory, nonetheless.
 
 \begin{figure}
 \begin{subfigure}[b]{\textwidth}
@@ -286,10 +285,11 @@ The block descriptor is doubtlessly the most powerful descriptor used in this ex
 The histogram method is advantageous as it increases the resilience against outliers (e.g. salt-and-pepper noise) by averaging over the blocks via the histograms. Furthermore, it is robust in the sense that it is almost invariant to small shifts. In addition, the normalisation ensures that illumination or contrast changes do not notable affect the result.
 
 \subsection{Discussion of blocks within the patch}
-The blocks within the patches mainly increase the size of the feature vector. This is helpful as it makes the distinction between different interest points clearer.
+The blocks within the patches mainly increase the size of the feature vector. This is helpful as it makes the distinction between different interest points clearer. 
 
-%TODO ans no
+%In addition,
 
-However, this increases the rotation variance of the descriptor as in case of a rotated image not only the direction values change, but also the block to which a pixel belongs might be altered.
+
+However, this increases the rotation variance of the descriptor as in case of a rotated image not only the direction values change, but also the block to which a pixel belongs might be altered. Furthermore, the smaller blocks counteract the aforementioned advantage of outlier suppression via the histograms.
 
 \end{document}
