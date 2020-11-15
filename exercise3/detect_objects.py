@@ -3,8 +3,8 @@
 
 """ Detect an object in an image and return position, scale and orientation
 
-Author: FILL IN
-MatrNr: FILL IN
+Author: Severin Jäger
+MatrNr: 01613004
 """
 from typing import Tuple, List
 
@@ -21,7 +21,7 @@ def detect_objects(scene_img: np.ndarray,
                    object_img: np.ndarray,
                    scene_keypoints: List[cv2.KeyPoint],
                    object_keypoints: List[cv2.KeyPoint],
-                   matches: List[cv2.DMatch],
+                   matches: List[List[cv2.DMatch]],
                    debug_output: bool = False) -> np.ndarray:
     """Return detected configurations of object_img in scene_img given keypoints and matches
 
@@ -58,11 +58,39 @@ def detect_objects(scene_img: np.ndarray,
     :rtype: np.array with shape (n, 4) with n being the number of detected objects
     """
     ######################################################
-    # Write your own code here
 
-    # Replace these lines.
-    object_configurations = np.empty((0, 4))  # Accomplishes the same as np.zeros((1,4)), for demonstration of np.r_
-    object_configurations = np.r_[object_configurations, np.array([[0., 0., 0., 0.]])]
+    # Fill voting space
+    voting_space = np.zeros((0, 4))
+    for matches_obj in matches:
+        for match in matches_obj:
+            # Filter out bad SIFT matches
+            if match.distance > 250:
+                continue
+
+            obj_kp = object_keypoints[match.queryIdx]
+            scn_kp = scene_keypoints[match.trainIdx]
+            vote = np.asarray(match_to_params(scn_kp, obj_kp))
+            voting_space = np.r_[voting_space, [vote]]
+    print(voting_space.shape[0])
+
+    # Clustering
+    clustering_space = np.zeros((voting_space.shape[0], 4))  # Normalised voting space
+    clustering_space[:, 0] = voting_space[:, 0] / max(voting_space[:, 0])
+    clustering_space[:, 1] = voting_space[:, 1] / max(voting_space[:, 1])
+    clustering_space[:, 2] = voting_space[:, 2] / max(voting_space[:, 2])
+    clustering_space[:, 3] = voting_space[:, 3] / max(voting_space[:, 3])
+
+    # 0.08, 11 works for images 1-3
+    # 0.08, 7 for images 2 and 4
+    # TODO unify duplicate clusters, get rid of outliers (before averaging)
+    cluster_labels = sklearn.cluster.DBSCAN(eps=0.08, min_samples=7).fit_predict(clustering_space)
+
+    object_configurations = np.zeros((0, 4))
+    for label in range(np.max(cluster_labels).astype(int) + 1):
+        cluster = voting_space[cluster_labels == label, :]
+        #plot_img = draw_rectangles(scene_img, object_img, cluster)
+        #show_image(plot_img, "cluster")
+        object_configurations = np.r_[object_configurations, [np.average(cluster, axis=0)]]
 
     ######################################################
 
@@ -91,8 +119,18 @@ def match_to_params(scene_keypoint: cv2.KeyPoint, object_keypoint: cv2.KeyPoint)
     :rtype: (float, float, float, float)
     """
     ######################################################
-    # Write your own code here
-    x, y, scale, orientation = 0., 0., 0., 0.  # Replace this line
+    x_scene, y_scene = scene_keypoint.pt
+    x_object, y_object = object_keypoint.pt
 
+    r = np.sqrt(np.square(x_object) + np.square(y_object))
+    beta = np.arctan2(y_object, x_object) + np.pi
+
+    scale = scene_keypoint.size / object_keypoint.size
+    orientation = np.pi/180 * (scene_keypoint.angle - object_keypoint.angle)
+
+    x = x_scene + scale * r * np.cos(beta + orientation)
+    y = y_scene + scale * r * np.sin(beta + orientation)
+
+    # print(x, y, scale, orientation, r, beta)
     ######################################################
     return x, y, scale, orientation

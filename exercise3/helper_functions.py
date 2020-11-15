@@ -3,8 +3,8 @@
 
 """ Multiple helper functions for visualizing results
 
-Author: FILL IN
-MatrNr: FILL IN
+Author: Severin Jäger
+MatrNr: 01613004
 """
 
 import cv2
@@ -43,9 +43,15 @@ def transform_points(points: np.ndarray, dx: float, dy: float, scaling: float, r
     :rtype: np.ndarray with shape (n, 2)
     """
     ######################################################
-    # Write your own code here
-    transformed_points = points.copy()  # Replace this line
+    # transform points to homogeneous coordinates
+    points_h = np.c_[points, np.ones((points.shape[0], 1))]
 
+    # transformation matrix in homogeneous coordinates (Book Equation (2.18))
+    t = np.array([[scaling * np.cos(rotation), -scaling * np.sin(rotation), dx],
+                  [scaling * np.sin(rotation),  scaling * np.cos(rotation), dy]])
+
+    # apply transformation matrix to all points (in homogeneous coordinates)
+    transformed_points = np.matmul(t, points_h.T).T
     ######################################################
     return transformed_points
 
@@ -85,10 +91,10 @@ def draw_rectangles(scene_img: np.ndarray,
     # according to the configuration, and draw them using cv2.polylines
     for conf in object_configurations:
         rectangle_tf = np.around(transform_points(rectangle, conf[0], conf[1], conf[2], conf[3])).astype(np.int32)
-        cv2.polylines(output_img, [rectangle_tf], isClosed=True, color=(0, 255, 0), thickness=3)
+        cv2.polylines(output_img, [rectangle_tf], isClosed=True, color=(0, 255, 0), thickness=2)
 
         # Change the top line to be blue, so we can tell the top of the object
-        cv2.line(output_img, tuple(rectangle_tf[0]), tuple(rectangle_tf[1]), color=(255, 0, 0), thickness=3)
+        cv2.line(output_img, tuple(rectangle_tf[0]), tuple(rectangle_tf[1]), color=(255, 0, 0), thickness=2)
 
     return output_img
 
