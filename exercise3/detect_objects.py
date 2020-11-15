@@ -6,7 +6,7 @@
 Author: FILL IN
 MatrNr: FILL IN
 """
-from typing import Tuple
+from typing import Tuple, List
 
 import numpy as np
 import cv2
@@ -19,9 +19,9 @@ from helper_functions import *
 
 def detect_objects(scene_img: np.ndarray,
                    object_img: np.ndarray,
-                   scene_keypoints: cv2.KeyPoint,
-                   object_keypoints: cv2.KeyPoint,
-                   matches: cv2.DMatch,
+                   scene_keypoints: List[cv2.KeyPoint],
+                   object_keypoints: List[cv2.KeyPoint],
+                   matches: List[cv2.DMatch],
                    debug_output: bool = False) -> np.ndarray:
     """Return detected configurations of object_img in scene_img given keypoints and matches
 
@@ -69,7 +69,7 @@ def detect_objects(scene_img: np.ndarray,
     return object_configurations
 
 
-def match_to_params(scene_keypoint, object_keypoint) -> Tuple[float, float, float, float]:
+def match_to_params(scene_keypoint: cv2.KeyPoint, object_keypoint: cv2.KeyPoint) -> Tuple[float, float, float, float]:
     """ Compute the position, rotation and scale of an object implied by a matching pair of descriptors
 
     This function uses two matching keypoints in the object and scene image to calculate the x and y coordinates, the
