@@ -22,7 +22,7 @@ from helper_functions import *
 if __name__ == '__main__':
     # You can change the parameters here. You should not need to change anything else
     image_nr = 4
-    save_image = False
+    save_image = True
     use_matplotlib = False
     debug_output = False  # <<< change to reduce output when you're done
 
