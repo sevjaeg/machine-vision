@@ -21,10 +21,10 @@ from helper_functions import *
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     # You can change the parameters here. You should not need to change anything else
-    image_nr = 1
+    image_nr = 4
     save_image = False
     use_matplotlib = False
-    debug_output = True  # <<< change to reduce output when you're done
+    debug_output = False  # <<< change to reduce output when you're done
 
     # Get path
     current_path = Path(__file__).parent

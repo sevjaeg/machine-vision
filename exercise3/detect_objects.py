@@ -58,20 +58,22 @@ def detect_objects(scene_img: np.ndarray,
     :rtype: np.array with shape (n, 4) with n being the number of detected objects
     """
     ######################################################
+    # Parameters
+    SIFT_THRESHOLD = 250
+    EPS = 0.08
+    MIN_SAMPLES = 11
+    MIN_CLUSTER_DIST = 20
 
-    # Fill voting space
     voting_space = np.zeros((0, 4))
     for matches_obj in matches:
         for match in matches_obj:
-            # Filter out bad SIFT matches
-            if match.distance > 250:
+            if match.distance > SIFT_THRESHOLD:                            # Filter out bad SIFT matches
                 continue
-
             obj_kp = object_keypoints[match.queryIdx]
             scn_kp = scene_keypoints[match.trainIdx]
-            vote = np.asarray(match_to_params(scn_kp, obj_kp))
-            voting_space = np.r_[voting_space, [vote]]
-    print(voting_space.shape[0])
+            vote = np.asarray(match_to_params(scn_kp, obj_kp))  # calculate vote for this match
+            voting_space = np.r_[voting_space, [vote]]          # add vote to voting space
+    print("Voting space with {:d} elements".format(voting_space.shape[0]))
 
     # Clustering
     clustering_space = np.zeros((voting_space.shape[0], 4))  # Normalised voting space
@@ -80,18 +82,32 @@ def detect_objects(scene_img: np.ndarray,
     clustering_space[:, 2] = voting_space[:, 2] / max(voting_space[:, 2])
     clustering_space[:, 3] = voting_space[:, 3] / max(voting_space[:, 3])
 
-    # 0.08, 11 works for images 1-3
-    # 0.08, 7 for images 2 and 4
-    # TODO unify duplicate clusters, get rid of outliers (before averaging)
-    cluster_labels = sklearn.cluster.DBSCAN(eps=0.08, min_samples=7).fit_predict(clustering_space)
+    # 0.08, 11 for all images
+    cluster_labels = sklearn.cluster.DBSCAN(eps=EPS, min_samples=MIN_SAMPLES).fit_predict(clustering_space)
+    number_of_clusters = np.max(cluster_labels).astype(int) + 1
+    print("{:d} clusters detected".format(number_of_clusters))
 
     object_configurations = np.zeros((0, 4))
-    for label in range(np.max(cluster_labels).astype(int) + 1):
+    for label in range(number_of_clusters):
         cluster = voting_space[cluster_labels == label, :]
-        #plot_img = draw_rectangles(scene_img, object_img, cluster)
-        #show_image(plot_img, "cluster")
-        object_configurations = np.r_[object_configurations, [np.average(cluster, axis=0)]]
+        # median of all cluster members is kept
+        object_configurations = np.r_[object_configurations, [np.median(cluster, axis=0)]]
+        if debug_output:  # show clusters
+            plot_img = draw_rectangles(scene_img, object_img, cluster)
+            show_image(plot_img, "cluster")
 
+    for cluster_a in range(0, number_of_clusters):
+        for cluster_b in range(cluster_a + 1, number_of_clusters):              # iterate over all cluster combinations
+            # find clusters close to each other and average their values
+            if np.linalg.norm(object_configurations[cluster_a, :] - object_configurations[cluster_b, :]) \
+                    < MIN_CLUSTER_DIST:
+                object_configurations[cluster_a, [0, 2]] = np.average([object_configurations[cluster_a, [0, 2]],
+                                                                       object_configurations[cluster_b, [0, 2]]],
+                                                                      axis=0)
+                object_configurations[cluster_a, 3] = average_angles(object_configurations[cluster_a, 3],
+                                                                     object_configurations[cluster_b, 3])
+                object_configurations[cluster_b, :] = 0                          # set lines to be removed to zero
+    object_configurations = object_configurations[object_configurations.all(1)]  # get rid of all zero lines
     ######################################################
 
     return object_configurations
@@ -127,10 +143,22 @@ def match_to_params(scene_keypoint: cv2.KeyPoint, object_keypoint: cv2.KeyPoint)
 
     scale = scene_keypoint.size / object_keypoint.size
     orientation = np.pi/180 * (scene_keypoint.angle - object_keypoint.angle)
+    # keep the angle between -pi and pi
+    if orientation < -np.pi:
+        orientation += 2*np.pi
+    elif orientation > np.pi:
+        orientation -= 2*np.pi
 
     x = x_scene + scale * r * np.cos(beta + orientation)
     y = y_scene + scale * r * np.sin(beta + orientation)
-
-    # print(x, y, scale, orientation, r, beta)
     ######################################################
     return x, y, scale, orientation
+
+
+def average_angles(a, b):
+    """
+    Calculates the average of two angles (input and output in radians [-pi, pi])
+    """
+    x = np.cos(a) + np.cos(b)
+    y = np.sin(a) + np.sin(b)
+    return np.arctan2(y, x)
