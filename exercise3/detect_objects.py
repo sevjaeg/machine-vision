@@ -59,7 +59,7 @@ def detect_objects(scene_img: np.ndarray,
     """
     ######################################################
     # Parameters
-    SIFT_THRESHOLD = 250
+    SIFT_THRESHOLD = 350
     EPS = 0.08
     MIN_SAMPLES = 11
     MIN_CLUSTER_DIST = 20
