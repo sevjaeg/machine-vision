@@ -59,9 +59,9 @@
 
 \section{Voting and Clustering}
 \label{sec:clustering}	
-The detection methods relies on the Generalised Hough Transform (GHT) which fills a four-dimensional voting space (displacement $x$ and $y$, scale $S$, rotation $\theta$). Due to the high number of matches coming from SIFT (s. Section \ref{sec:threshold}), a clustering algorithm is required to group the entries and distinguish the most significant ones.
+The detection method relies on the Generalised Hough Transform (GHT) which fills a four-dimensional voting space (displacement $x$ and $y$, scale $S$, rotation $\theta$). Due to the high number of matches coming from SIFT (s. Section \ref{sec:threshold}), a clustering algorithm is required to group the entries and distinguish the most significant ones.
 
-Both these goals can elegantly be achieved with the DBSCAN clustering algorithm. It starts with high density points in the voting space (expectedly, these are around the desired matches) and offers two relevant parameters. The first one, $\epsilon$ denotes the maximum distance between two matches to still be considered as one cluster. It is crucial to normalise the voting space before applying the clustering, otherwise this parameter does not scale between different images. Suitable tuning of $\epsilon$ ensures that the algorithm nicely suppresses outliers within a cluster. The second parameter is $n_{min}$, which describes the number of matches required for a cluster to be counted. All clusters with less results are not considered as clusters. This allows suppression of smaller clusters, likely created by wrong matches.
+Both these goals can elegantly be achieved with the DBSCAN clustering algorithm. It starts with high density points in the voting space (expectedly, these are around the desired matches) and offers two relevant parameters. The first one, $\epsilon$, denotes the maximum distance between two matches to still be considered as one cluster. It is crucial to normalise the voting space before applying the clustering, otherwise this parameter does not scale between different images. Suitable tuning of $\epsilon$ ensures that the algorithm nicely suppresses outliers within a cluster. The second parameter is $n_{min}$, which describes the number of matches required for a cluster to be counted. All clusters with less results are not considered as clusters. This allows suppression of smaller clusters, likely created by wrong matches.
 
 It is nonetheless possible that DBSCAN yields two clusters for one detected object. The reason for this behaviour lies in the discontinuity of the rotation which lies between $-\pi$ and $\pi$. So objects rotated by roughly \SI{180}{\degree} receive votes with $\theta \approx \pi$ and $\theta \approx \-pi$. These votes are nonetheless separated in the voting space and therefore the algorithm might find two clusters. This is mitigated by searching for clusters with small distances in the voting space and unifying these clusters by averaging them.
 
@@ -69,7 +69,7 @@ It is nonetheless possible that DBSCAN yields two clusters for one detected obje
 \begin{figure}
 \centering
 \includegraphics[width=12cm]{img1.png}
-\caption{Detected objects in Image 1}
+\caption{Detected objects in image 1}
 \label{img1}
 \end{figure}
 
@@ -96,21 +96,21 @@ In all four images, the objects have been detected rather precisely. There are n
 \begin{figure}
 \centering
 \includegraphics[width=12cm]{img2.png}
-\caption{Detected objects in Image 2}
+\caption{Detected objects in image 2}
 \label{img2}
 \end{figure}
 
 \begin{figure}
 \centering
 \includegraphics[width=12cm]{img3.png}
-\caption{Detected objects in Image 3}
+\caption{Detected objects in image 3}
 \label{img3}
 \end{figure}
 
 \begin{figure}
 \centering
 \includegraphics[width=12cm]{img4.png}
-\caption{Detected objects in Image 4}
+\caption{Detected objects in image 4}
 \label{img4}
 \end{figure}
 
@@ -121,11 +121,13 @@ In all four images, the objects have been detected rather precisely. There are n
 
 As the object image (Figure \ref{object}) contains hundreds of SIFT interest points and the matching algorithm matches each of them to the three closest interest points in the second image, many matches are not useful for detection at all. For this reason, the matches are filtered with a simple threshold $t_{SIFT}$, only matches with a distance (in the SIFT feature space) below this threshold are considered.
 
-As the value of the threshold determines the number of considered matches, it strongly affects the detection quality. Table \ref{tab:t} shows this behaviour exemplarily for Image 4. The following observations can be made:
+As the value of the threshold determines the number of considered matches, it strongly affects the detection quality. Table \ref{tab:t} shows this behaviour exemplarily for image 4. The following observations can be made:
 
 \begin{itemize}
 \item For low values of $t_{SIFT}$, there are hardly any matches considered. As a result, DBSCAN is unable to detect clusters (mainly as the value of $n_{min}$ is too small). As a result, no or only a few objects are detected. Figure \ref{t100} shows this exemplarily.
-\item Moderate values of the threshold yield good results. For a wide range of $t_{SIFT}$, the number of matches is sufficiently above $n_{min}$ and their satisfactory, so the clustering algorithm is able to detect the desired objects as depicted in Figure \ref{img4}.
+
+\item Moderate values of the threshold yield good results. For a wide range of $t_{SIFT}$, the number of matches is sufficiently above $n_{min}$ and their quality is satisfactory, so the clustering algorithm is able to detect the desired objects as depicted in Figure \ref{img4}.
+
 \item High values of $t_{SIFT}$ yield large numbers of considered matches, however many matches of inferior quality are not filtered out. These matches significantly deteriorate the detection quality. Figure \ref{t350} gives an example of the detection being disturbed heavily for some objects while still operating correctly for large objects. In case the threshold is increased even further, the tremendous number of bad matches overrules the correct ones and no reasonable results are achieved any longer. This is shown in Figure \ref{t400}.
 \end{itemize}
 
@@ -146,7 +148,7 @@ As the value of the threshold determines the number of considered matches, it st
 	
 		\bottomrule
 	\end{tabular}
-	\caption{Considered matches, clusters detected by DBSCAN, clusters after fusion of close clusters and number of correctly detected objects for different values of $t_{SIFT}$. The analysis was conducted with Image 4 (s. Figure \ref{img4}), all other parameters were set as defined in Section \ref{sec:results}.}
+	\caption{Considered matches, clusters detected by DBSCAN, clusters after fusion of close clusters and number of correctly detected objects for different values of $t_{SIFT}$. The analysis was conducted with image 4 (s. Figure \ref{img4}), all other parameters were set as defined in Section \ref{sec:results}.}
 \label{tab:t}
 \end{table}
 
@@ -155,7 +157,7 @@ A major drawback of this method is that it scales only partially to different im
 \begin{figure}
 \centering
 \includegraphics[width=12cm]{t100.png}
-\caption{Detected objects in Image 4 with $t_{SIFT} = 100$}
+\caption{Detected objects in image 4 with $t_{SIFT} = 100$}
 \label{t100}
 \end{figure}
 
@@ -163,14 +165,14 @@ A major drawback of this method is that it scales only partially to different im
 \begin{figure}
 \centering
 \includegraphics[width=12cm]{t350.png}
-\caption{Detected objects in Image 4 with $t_{SIFT} = 350$}
+\caption{Detected objects in image 4 with $t_{SIFT} = 350$}
 \label{t350}
 \end{figure}
 
 \begin{figure}
 \centering
 \includegraphics[width=12cm]{t400.png}
-\caption{Detected objects in Image 4 with $t_{SIFT} = 400$}
+\caption{Detected objects in image 4 with $t_{SIFT} = 400$}
 \label{t400}
 \end{figure}
 
