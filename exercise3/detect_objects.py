@@ -58,11 +58,11 @@ def detect_objects(scene_img: np.ndarray,
     :rtype: np.array with shape (n, 4) with n being the number of detected objects
     """
     ######################################################
-    # Parameters
-    SIFT_THRESHOLD = 350
-    EPS = 0.08
-    MIN_SAMPLES = 11
-    MIN_CLUSTER_DIST = 20
+    # Parameters (defined in report)
+    SIFT_THRESHOLD = 250    # 250
+    EPS = 0.08              # 0.08
+    MIN_SAMPLES = 11        # 11
+    MIN_CLUSTER_DIST = 20   # 20
 
     voting_space = np.zeros((0, 4))
     for matches_obj in matches:
@@ -73,7 +73,7 @@ def detect_objects(scene_img: np.ndarray,
             scn_kp = scene_keypoints[match.trainIdx]
             vote = np.asarray(match_to_params(scn_kp, obj_kp))  # calculate vote for this match
             voting_space = np.r_[voting_space, [vote]]          # add vote to voting space
-    print("Voting space with {:d} elements".format(voting_space.shape[0]))
+    print("{:d} matches considered".format(voting_space.shape[0]))
 
     # Clustering
     clustering_space = np.zeros((voting_space.shape[0], 4))  # Normalised voting space
@@ -81,8 +81,6 @@ def detect_objects(scene_img: np.ndarray,
     clustering_space[:, 1] = voting_space[:, 1] / max(voting_space[:, 1])
     clustering_space[:, 2] = voting_space[:, 2] / max(voting_space[:, 2])
     clustering_space[:, 3] = voting_space[:, 3] / max(voting_space[:, 3])
-
-    # 0.08, 11 for all images
     cluster_labels = sklearn.cluster.DBSCAN(eps=EPS, min_samples=MIN_SAMPLES).fit_predict(clustering_space)
     number_of_clusters = np.max(cluster_labels).astype(int) + 1
     print("{:d} clusters detected".format(number_of_clusters))
@@ -90,7 +88,7 @@ def detect_objects(scene_img: np.ndarray,
     object_configurations = np.zeros((0, 4))
     for label in range(number_of_clusters):
         cluster = voting_space[cluster_labels == label, :]
-        # median of all cluster members is kept
+        # median of all cluster members is kept to mitigate outliers
         object_configurations = np.r_[object_configurations, [np.median(cluster, axis=0)]]
         if debug_output:  # show clusters
             plot_img = draw_rectangles(scene_img, object_img, cluster)
@@ -108,6 +106,7 @@ def detect_objects(scene_img: np.ndarray,
                                                                      object_configurations[cluster_b, 3])
                 object_configurations[cluster_b, :] = 0                          # set lines to be removed to zero
     object_configurations = object_configurations[object_configurations.all(1)]  # get rid of all zero lines
+    print("{:d} objects detected".format(object_configurations.shape[0]))
     ######################################################
 
     return object_configurations
