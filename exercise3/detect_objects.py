@@ -99,8 +99,8 @@ def detect_objects(scene_img: np.ndarray,
             # find clusters close to each other and average their values
             if np.linalg.norm(object_configurations[cluster_a, :] - object_configurations[cluster_b, :]) \
                     < MIN_CLUSTER_DIST:
-                object_configurations[cluster_a, [0, 2]] = np.average([object_configurations[cluster_a, [0, 2]],
-                                                                       object_configurations[cluster_b, [0, 2]]],
+                object_configurations[cluster_a, 0:2] = np.average([object_configurations[cluster_a, 0:2],
+                                                                       object_configurations[cluster_b, 0:2]],
                                                                       axis=0)
                 object_configurations[cluster_a, 3] = average_angles(object_configurations[cluster_a, 3],
                                                                      object_configurations[cluster_b, 3])
