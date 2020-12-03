@@ -136,7 +136,7 @@ In case the learning rate is reduced, the previously described disadvantage is m
 \end{figure}
 
 \subsection{Adam optimiser}
-The Adam optimiser features a adaptive learning rate. In theory, this should combine the advantages of the two previously described approaches: It offers a high learning rate in the beginning (and therefore fosters convergence) and decreases it steadily in order to maintain a smooth improvement process without overruling the weights from the early training completely.
+The Adam optimiser features an adaptive learning rate. In theory, this should combine the advantages of the two previously described approaches: It offers a high learning rate in the beginning (and therefore fosters convergence) and decreases it steadily in order to maintain a smooth improvement process without overruling the weights from the early training completely.
 
 Figure \ref{learning_c} shows this exemplarily: Initially, the loss drops quickly, in later epochs only slight changes emerge. This matches the expectations. However, the overall accuracy is below the ones reached with the SDG optimiser. One reason might be that the changes with the high learning rate in the beginning were only suitable for a small subset of the training data (so overfitted for these images) and later steps cannot overrule these weights as their learning rates are very small.
 
@@ -180,7 +180,7 @@ Table \ref{tab} compares the detection results of the multilayer perceptron with
 
 Image 1 is the greatest challenge for both classifiers: Both clearly detect a deer (the CNN even clearer), however their second choice is a horse. This is likely to be due to the colors: A deer might be brown as well and the shapes might resemble, too.
 
-Image 2 clearly separates the two classifiers: The CNN clearly detects a horse, while the MLP is unable to classify the image properly. One potential reason is that the CNN is able to detect the shape, while the MLP mainly relying on the colours cannot classify the image as typical horse images (in the training set) have a different background.
+Image 2 clearly separates the two classifiers: The CNN unambiguously detects a horse, while the MLP is unable to classify the image properly. One potential reason is that the CNN is able to detect the shape, while the MLP is mainly relying on the colours and cannot classify the image as typical horse images (in the training set) have a different background.
 
 However, image 3 shows that both detectors are able to classify image correctly: Here the MLP also detects a horse rather clearly. As mentioned before, the background colour might be a reason for this behaviour.
 
@@ -231,7 +231,7 @@ l_2 = l_1 + (w_{kernel}-1) \cdot s = 3 + 2 \cdot 2 = 7.
 Finally, the receptive field of the third convolutional layer calculates to 
 
 \begin{equation}
-l_3 = l_2 + (w_{kernel}-1) \cdot s^2 = 7 + 2 \cdot 4 = 15.
+l_3 = l_2 + (w_{kernel}-1) \cdot s^2 = 7 + 2 \cdot 2^2 = 15.
 \end{equation}
 
 \end{document}
