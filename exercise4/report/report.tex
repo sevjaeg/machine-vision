@@ -216,22 +216,36 @@ CNNs overcome some of these disadvantages, especially by providing translation i
 
 \subsection{Receptive field}
 
-Trivially, the input layer has a receptive field of $l_0 = 1$. The receptive field of the first convolutional layer can be calculated using the kernel size $w_{kernel} = 3 $  and the equation from slide 27 in lecture 7 as
+Trivially, the input layer has a receptive field of $l_0 = 1$. The receptive field of the first convolutional layer can be calculated
+ using the kernel size $w_{kernel} = 3$ and the equation from slide 27 in lecture 7 as
 
 \begin{equation}
 l_1 = l_0 + (w_{kernel}-1) = 1 + 2 = 3.
 \end{equation}
 
-In the following, the receptive field of the second convolutional layer is considering the stride of the MaxPool layer $s=2$ given as
+The receptive field of the first MaxPool layer is (considering the kernel width of the pooling operator $w_{pool} = 2$)
 
 \begin{equation}
-l_2 = l_1 + (w_{kernel}-1) \cdot s = 3 + 2 \cdot 2 = 7.
+l_2 = l_1 + (w_{pool}-1) = 3 + 1 = 4.
 \end{equation}
 
-Finally, the receptive field of the third convolutional layer calculates to 
+In the following, the receptive field of the second convolutional layer is under consideration of stride the pooling layer $stride s=2$
+ given as
 
 \begin{equation}
-l_3 = l_2 + (w_{kernel}-1) \cdot s^2 = 7 + 2 \cdot 2^2 = 15.
+l_3 = l_2 + (w_{kernel}-1) \cdot s  = 4 + 2 \cdot 2 = 8.
+\end{equation}
+
+The receptive field of the second MaxPool layer calculates to
+
+\begin{equation}
+l_4 = l_3 + (w_{pool}-1) \cdot s = 8 + 2 = 10.
+\end{equation}
+
+Finally, the receptive field of the third convolutional layer is given as
+
+\begin{equation}
+l_5 = l_4 + (w_{kernel}-1) \cdot s^2 = 10 + 2 \cdot 2^2 = 18.
 \end{equation}
 
 \end{document}
