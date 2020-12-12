@@ -3,8 +3,8 @@
 
 """ Different error functions for plane fitting
 
-Author: FILL IN
-MatrNr: FILL IN
+Author: Severin Jäger
+MatrNr: 01613004
 """
 from typing import Tuple
 
@@ -35,10 +35,8 @@ def ransac_error(pcd: o3d.geometry.PointCloud,
     :rtype: (float, np.ndarray)
     """
     ######################################################
-    # Write your own code here
-    inliers = np.full(distances.shape, False)
-    error = np.inf
-
+    inliers = distances < threshold
+    error = distances.size - np.sum(inliers)
     ######################################################
     return error, inliers
 
@@ -46,7 +44,7 @@ def ransac_error(pcd: o3d.geometry.PointCloud,
 def msac_error(pcd: o3d.geometry.PointCloud,
                distances: np.ndarray,
                threshold: float) -> Tuple[float, np.ndarray]:
-    """ Calculate the MSAC error as defined in http://www.mica.edu.vn/perso/Le-Van-Hung/GCSAC/paper/torr00.pdf
+    """ Calculate the MSAC error as defined in https://pdfs.semanticscholar.org/40d3/0ade023d671c0f4e41e7045f3e59db44edcc.pdf
 
     :param pcd: The (down-sampled) pointcloud in which to detect the dominant plane
     :type pcd: o3d.geometry.PointCloud (http://www.open3d.org/docs/release/python_api/open3d.geometry.PointCloud.html)
@@ -63,10 +61,8 @@ def msac_error(pcd: o3d.geometry.PointCloud,
     :rtype: (float, np.ndarray)
     """
     ######################################################
-    # Write your own code here
-    inliers = np.full(distances.shape, False)
-    error = np.inf
-
+    inliers = distances < threshold
+    error = np.sum(np.where(inliers, distances ** 2, threshold ** 2))
     ######################################################
     return error, inliers
 
@@ -74,7 +70,7 @@ def msac_error(pcd: o3d.geometry.PointCloud,
 def mlesac_error(pcd: o3d.geometry.PointCloud,
                  distances: np.ndarray,
                  threshold: float) -> Tuple[float, np.ndarray]:
-    """ Calculate the MLESAC error as defined in http://www.mica.edu.vn/perso/Le-Van-Hung/GCSAC/paper/torr00.pdf
+    """ Calculate the MLESAC error as defined in https://pdfs.semanticscholar.org/40d3/0ade023d671c0f4e41e7045f3e59db44edcc.pdf
 
     :param pcd: The (down-sampled) pointcloud in which to detect the dominant plane
     :type pcd: o3d.geometry.PointCloud (http://www.open3d.org/docs/release/python_api/open3d.geometry.PointCloud.html)
@@ -92,6 +88,10 @@ def mlesac_error(pcd: o3d.geometry.PointCloud,
     """
     ######################################################
     # Write your own code here
+    sigma = threshold / 2
+
+    # v = max diag
+
     inliers = np.full(distances.shape, False)
     error = np.inf
 

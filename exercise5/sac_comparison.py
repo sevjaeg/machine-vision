@@ -3,8 +3,8 @@
 
 """ Script to compare different error functions for plane fitting
 
-Author: FILL IN
-MatrNr: FILL IN
+Author: Severin Jäger
+MatrNr: 01613004
 """
 
 import numpy as np
