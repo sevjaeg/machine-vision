@@ -1,0 +1,251 @@
+\documentclass[a4paper, 12pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+
+\usepackage{lmodern}  % nicer font
+\usepackage{gensymb}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{nicefrac}  % nicer inline fractions
+\usepackage{listings}
+\usepackage{enumerate}
+\usepackage{booktabs}
+\usepackage{siunitx}  % easy handling of value + unit (e.g. \SI{10}{\pF})
+% \sisetup{}  % configure siunitx (e.g. locale = DE)
+\usepackage{verbatim}
+\usepackage{subcaption}  % captions for subplots
+\usepackage[european, siunitx]{circuitikz}  % draw circuit diagrams
+\usepackage{enumitem}
+\setlist[itemize]{label=\rule[0.5ex]{0.6ex}{0.6ex}} % nice black squares for itemize environments
+\usepackage{graphicx}
+\graphicspath{{./figures/}}
+
+\usepackage{geometry}
+\geometry{%
+	left   = 2.5cm,
+	right  = 2.5cm,
+	top    = 3cm,
+	bottom = 3cm
+}
+
+\usepackage[hang]{footmisc}
+\renewcommand{\hangfootparindent}{2em} 
+\renewcommand{\hangfootparskip}{2em}
+\renewcommand{\footnotemargin}{0.00001pt}
+\renewcommand{\footnotelayout}{\hspace{2em}}
+
+
+\title{376.054 Machine Vision and Cognitive Robotics\\
+	   Exercise 4: Deep Learning}
+\author{
+  Severin Jäger, 01613004
+}
+\date{\today}
+
+% last imports! Modify Title and author
+\usepackage[bookmarksopen,colorlinks,citecolor=black,linkcolor=black, urlcolor = black]{hyperref}
+% after hyperref! Example: In \cref{label}, ... -> In section 2.1, ...
+% works for all labels (figures, sections, chapters, equations, ...)
+\usepackage[noabbrev, nameinlink]{cleveref} 
+
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\pagebreak
+
+\section{Experiment 1}
+
+\subsection{Training histories of different approaches}
+
+Figures \ref{training_lin} to \ref{training_resnet} compare the training histories (composed of accuracy and loss) for the different implemented machine learning approaches.
+
+The linear classifier (s. Figure \ref{training_lin}) has the worst performance in terms of accuracy and hardly improves over the learning epochs. This is reasonable, as its simple structure is not suitable for the complex task of image classification.
+
+The multilayer perceptron (s. Figure \ref{training_mlp}) contains two layers (plus one output layer) and shows already a better accuracy. However, over the training epochs the training accuracy diverges from the test accuracy (which hardly improves). The loss function divergence supports the observation of significant overfitting. This can be mitigated with regularisation measures (s. Figure \ref{training_mlp_reg}). In this case, dropout (with $d=0.2$) and L2 regularisation (with $\lambda=0.003$) were applied. As a result, on not only overfitting is mitigated, but also the peak test accuracy is increased (from \SI{52}{\percent} to \SI{56}{\percent}).
+
+\begin{figure}
+\centering
+\includegraphics[width=16cm]{training_linear.png}
+\caption{Training history of the linear classifier}
+\label{training_lin}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=16cm]{training_mlp.png}
+\caption{Training history of the multilayer perceptron}
+\label{training_mlp}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=16cm]{training_mlp_reg.png}
+\caption{Training history of the multilayer perceptron with regularisations measures}
+\label{training_mlp_reg}
+\end{figure}
+
+A major step in performance comes with the use of convolutional neural networks (CNNs). Their structure is advantageous for image classification, as they detect features, shapes or objects independent of their exact position in the image. This results in significantly improved accuracy and an overfitting-free learning process if dropout (with $d=0.2$) is applied (s. Figure \ref{training_cnn}).
+
+\newpage
+Another approach is using a pre-trained CNN, in this case ResNet50 was used. As this network was trained with $1000$ classes, the last layer was removed and replaced by a dense layer with $1000$ nodes and an output layer mapping to the $10$ relevant classes. This approach works well (s. Figure \ref{training_resnet}), even after few training cycles. However, the training is computationally expensive and the accuracy hardly increases with further training epochs.
+
+\begin{figure}
+\centering
+\includegraphics[width=16cm]{training_cnn.png}
+\caption{Training history of the convolutional neural network}
+\label{training_cnn}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=16cm]{training_resnet.png}
+\caption{Training history of the ResNet50 network}
+\label{training_resnet}
+\end{figure}
+
+
+
+\clearpage
+\section{Experiment 2}
+In this section, the optimiser of the previously described multilayer perceptron with regularisation measures is altered in order to investigate its effect.
+
+\subsection{Stochastic gradient optimiser with learning rate 0.1}
+
+This optimiser features a very high learning rate and is therefore able to minimize the loss function rather quickly. However, this does not lead to a high test accuracy as the learning results from earlier cycles are replaced rather quickly (s. Figure \ref{learning_a}). So the model adjusts too quickly and is therefore only suitable for the last data used for training.
+
+\begin{figure}
+\centering
+\includegraphics[width=16cm]{learning_a.png}
+\caption{Training history with the SGD optimiser with a learning rate of $0.1$}
+\label{learning_a}
+\end{figure}
+
+\subsection{Stochastic gradient optimiser with learning rate 0.001}
+
+In case the learning rate is reduced, the previously described disadvantage is mitigated (s. Figure \ref{learning_b}). With a learning rate of $0.001$ the loss test as well as the training accuracy increases monotonously. However, the training process takes very long, here it does not converge within $30$ cycles.
+
+\begin{figure}
+\centering
+\includegraphics[width=16cm]{learning_b.png}
+\caption{Training history with the SGD optimiser with a learning rate of $0.001$}
+\label{learning_b}
+\end{figure}
+
+\subsection{Adam optimiser}
+The Adam optimiser features an adaptive learning rate. In theory, this should combine the advantages of the two previously described approaches: It offers a high learning rate in the beginning (and therefore fosters convergence) and decreases it steadily in order to maintain a smooth improvement process without overruling the weights from the early training completely.
+
+Figure \ref{learning_c} shows this exemplarily: Initially, the loss drops quickly, in later epochs only slight changes emerge. This matches the expectations. However, the overall accuracy is below the ones reached with the SDG optimiser. One reason might be that the changes with the high learning rate in the beginning were only suitable for a small subset of the training data (so overfitted for these images) and later steps cannot overrule these weights as their learning rates are very small.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=16cm]{learning_c.png}
+\caption{Training history with the Adam optimiser}
+\label{learning_c}
+\end{figure}
+
+
+\section{Experiment 3}
+
+\begin{figure} [h]
+\begin{subfigure}[b]{0.3\textwidth}
+\centering
+\includegraphics[width=4cm]{img1.png}
+\centering
+\subcaption{Image 1}
+\end{subfigure}
+\begin{subfigure}[b]{0.3\textwidth}
+\centering
+\includegraphics[width=4cm]{img2.png}
+\centering
+\subcaption{Image 2}
+\end{subfigure}
+\begin{subfigure}[b]{0.3\textwidth}
+\centering
+\includegraphics[width=4cm]{img3.png}
+\centering
+\subcaption{Image 3}
+\end{subfigure}
+\centering
+\caption{Test images}
+\label{imgs}
+\end{figure}
+
+\subsection{Influence of the test image}
+
+Table \ref{tab} compares the detection results of the multilayer perceptron with regularisation as described above with the ones obtained by the aforementioned CNN. The respective test images are shown in Figure \ref{imgs}.
+
+Image 1 is the greatest challenge for both classifiers: Both clearly detect a deer (the CNN even clearer), however their second choice is a horse. This is likely to be due to the colors: A deer might be brown as well and the shapes might resemble, too.
+
+Image 2 clearly separates the two classifiers: The CNN unambiguously detects a horse, while the MLP is unable to classify the image properly. One potential reason is that the CNN is able to detect the shape, while the MLP is mainly relying on the colours and cannot classify the image as typical horse images (in the training set) have a different background.
+
+However, image 3 shows that both detectors are able to classify image correctly: Here the MLP also detects a horse rather clearly. As mentioned before, the background colour might be a reason for this behaviour.
+
+\begin{table}
+\centering
+\begin{tabular}{c | c c | c c | c c}
+\toprule
+Classifier & $p_{horse,1}$ & $p_{deer,1}$ & $p_{horse,2}$ & $p_{deer,2}$ & $p_{horse,3}$ & $p_{deer,3}$ \\
+\midrule
+MLP & \SI{27.7}{\percent} & \SI{42.1}{\percent} & \SI{26.2}{\percent} &  \SI{16.6}{\percent} & \SI{49.1}{\percent} &  \SI{19.2}{\percent} \\
+CNN & \SI{24.5}{\percent} & \SI{74.6}{\percent} &  \SI{96.4}{\percent} &  \SI{3.1}{\percent} & \SI{97.6}{\percent} &  \SI{2.1}{\percent} \\
+\bottomrule
+\end{tabular}
+\caption{Detection results of the MLP with regularisation and the CNN}
+\label{tab}
+\end{table}
+
+\subsection{Linear classifier and its limitations}
+
+The linear classifier is a very simple machine learning system. However, as shown in Figure \ref{images_linear} it is able to detect some images correctly. This is mainly due to a similar pattern of colors within the image. So brown or white horses in front of a green background and filling most of the image are detected rather well, while different settings like different background colours or portraits are not detected. Additionally, images with a similar colour distribution tend to be classified as horses as well.
+CNNs overcome some of these disadvantages, especially by providing translation invariance due to the kernel moving over the image. Additionally, it preserves neighbourhood relations (as the image is not vectorised) and can therefore utilise features like edges.
+
+
+\begin{figure}
+\centering
+\includegraphics[width=16cm]{images_linear.png}
+\caption{Classification results of the linear classifier}
+\label{images_linear}
+\end{figure}
+
+\clearpage
+\section{Experiment 4}
+
+\subsection{Receptive field}
+
+Trivially, the input layer has a receptive field of $l_0 = 1$. The receptive field of the first convolutional layer can be calculated
+ using the kernel size $w_{kernel} = 3$ and the equation from slide 27 in lecture 7 as
+
+\begin{equation}
+l_1 = l_0 + (w_{kernel}-1) = 1 + 2 = 3.
+\end{equation}
+
+The receptive field of the first MaxPool layer is (considering the kernel width of the pooling operator $w_{pool} = 2$)
+
+\begin{equation}
+l_2 = l_1 + (w_{pool}-1) = 3 + 1 = 4.
+\end{equation}
+
+In the following, the receptive field of the second convolutional layer is under consideration of stride the pooling layer $stride s=2$
+ given as
+
+\begin{equation}
+l_3 = l_2 + (w_{kernel}-1) \cdot s  = 4 + 2 \cdot 2 = 8.
+\end{equation}
+
+The receptive field of the second MaxPool layer calculates to
+
+\begin{equation}
+l_4 = l_3 + (w_{pool}-1) \cdot s = 8 + 2 = 10.
+\end{equation}
+
+Finally, the receptive field of the third convolutional layer is given as
+
+\begin{equation}
+l_5 = l_4 + (w_{kernel}-1) \cdot s^2 = 10 + 2 \cdot 2^2 = 18.
+\end{equation}
+
+\end{document}
