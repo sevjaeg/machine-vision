@@ -105,8 +105,8 @@ def fit_plane(pcd: o3d.geometry.PointCloud,
         # print("Inverting vector")
         best_plane = best_plane * -1
 
-    print("Iterations:", num_iterations)
-    print("Plane:", best_plane)
+    # print("Iterations:", num_iterations)
+    # print("Plane:", best_plane)
     ######################################################
     return best_plane, best_inliers, num_iterations
 
@@ -157,13 +157,13 @@ def filter_planes(pcd: o3d.geometry.PointCloud,
     filtered_pcd = copy.deepcopy(pcd)
 
     no_points_initial = np.asarray(pcd.points).shape[0]
-    print(no_points_initial)
 
     no_points = no_points_initial
-    # TODO use min_points_prop correctly
     while no_points >= min_points_prop * no_points_initial:
         best_plane, best_inliers, n = fit_plane(filtered_pcd, confidence, inlier_threshold,
                                                 min_sample_distance, error_func)
+        if best_inliers.shape[0] < min_points_prop * no_points_initial:
+            continue  # no valid
         list_plane = np.argwhere(best_inliers).flatten().tolist()
         list_remainder = np.argwhere(np.invert(best_inliers)).flatten().tolist()
         plane_pcd = filtered_pcd.select_by_index(list_plane)
