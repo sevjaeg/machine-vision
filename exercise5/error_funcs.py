@@ -61,6 +61,8 @@ def msac_error(pcd: o3d.geometry.PointCloud,
     :rtype: (float, np.ndarray)
     """
     ######################################################
+    # The Torr and Zisserman paper uses threshold ** 2, but to keep it consistent with the basic RANSAC error above and
+    # the notion of a threshold, inliers are here still defined if they lie within the threshold.
     inliers = distances < threshold
     error = np.sum(np.where(inliers, distances ** 2, threshold ** 2))
     ######################################################
@@ -87,14 +89,28 @@ def mlesac_error(pcd: o3d.geometry.PointCloud,
     :rtype: (float, np.ndarray)
     """
     ######################################################
-    # Write your own code here
+    no_points = distances.size
+
+    # this method is fast, but overestimates the longest diagonal
+    nu = np.linalg.norm(o3d.geometry.PointCloud.get_max_bound(pcd) - o3d.geometry.PointCloud.get_min_bound(pcd))
+    gamma = 1 / 2
     sigma = threshold / 2
+    normalisation = (1 / (np.sqrt(2 * np.pi) * sigma))
 
-    # v = max diag
+    for i in range(3):
+        p_i = gamma * normalisation * np.exp(-(distances ** 2) / (2 * sigma ** 2))
+        p_o = (1 - gamma) / nu
+        z = p_i / (p_i + p_o)
+        gamma = np.sum(z) / no_points
 
-    inliers = np.full(distances.shape, False)
-    error = np.inf
+    # Use the last value of gamma
+    p_i = gamma * normalisation * np.exp(-(distances ** 2) / (2 * sigma ** 2))
+    p_o = (1 - gamma) / nu
+    # print(gamma)
+    # print(np.sum(inliers))
 
+    inliers = distances <= threshold
+    error = - np.sum(np.log(p_i + p_o))
     ######################################################
 
     return error, inliers

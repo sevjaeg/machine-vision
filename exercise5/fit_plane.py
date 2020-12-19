@@ -10,7 +10,6 @@ MatrNr: 01613004
 from typing import List, Tuple, Callable
 
 import copy
-
 import numpy as np
 import open3d as o3d
 
@@ -54,8 +53,8 @@ def fit_plane(pcd: o3d.geometry.PointCloud,
     min_error = np.inf
     best_plane = np.array([0., 1., 0., 0.])
     best_inliers = np.full(number_of_points, False)
-    error = 1
-    while error >= (1-confidence):
+    correct_prob = 1
+    while correct_prob >= (1-confidence):
         p1 = points[np.random.randint(0, number_of_points), :]
         p2 = points[np.random.randint(0, number_of_points), :]
         p3 = points[np.random.randint(0, number_of_points), :]
@@ -90,7 +89,7 @@ def fit_plane(pcd: o3d.geometry.PointCloud,
             eps = no_inliers/number_of_points
 
         num_iterations = num_iterations + 1
-        error = (1 - eps ** 3) ** num_iterations
+        correct_prob = (1 - eps ** 3) ** num_iterations
         # print("Max dist", np.max(distances))
         # print("Inliers", no_inliers)
         # print("Error", error)
@@ -152,25 +151,20 @@ def filter_planes(pcd: o3d.geometry.PointCloud,
     """
     ######################################################
 
-    plane_eqs = []
-    plane_pcds = []
+    plane_eqs, plane_pcds = [], []
     filtered_pcd = copy.deepcopy(pcd)
+    no_points = np.asarray(pcd.points).shape[0]
 
-    no_points_initial = np.asarray(pcd.points).shape[0]
-
-    no_points = no_points_initial
-    while no_points >= min_points_prop * no_points_initial:
-        best_plane, best_inliers, n = fit_plane(filtered_pcd, confidence, inlier_threshold,
+    while True:
+        best_plane, best_inliers, _ = fit_plane(filtered_pcd, confidence, inlier_threshold,
                                                 min_sample_distance, error_func)
-        if best_inliers.shape[0] < min_points_prop * no_points_initial:
-            continue  # no valid
-        list_plane = np.argwhere(best_inliers).flatten().tolist()
+        if sum(best_inliers) < min_points_prop * no_points:
+            print(str(len(plane_eqs)) + " planes detected")
+            return plane_eqs, plane_pcds, filtered_pcd
         list_remainder = np.argwhere(np.invert(best_inliers)).flatten().tolist()
+        list_plane = np.argwhere(best_inliers).flatten().tolist()
         plane_pcd = filtered_pcd.select_by_index(list_plane)
+        filtered_pcd = filtered_pcd.select_by_index(list_remainder)
         plane_eqs.append(best_plane)
         plane_pcds.append(plane_pcd)
-        filtered_pcd = filtered_pcd.select_by_index(list_remainder)
-        filtered_points = np.asarray(filtered_pcd.points)
-        no_points = filtered_points.shape[0]
 
-    return plane_eqs, plane_pcds, filtered_pcd

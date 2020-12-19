@@ -1,0 +1,155 @@
+\documentclass[a4paper, 12pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+
+\usepackage{lmodern}  % nicer font
+\usepackage{textcomp} % resolves warnings with gensymb
+\usepackage{gensymb}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{nicefrac}  % nicer inline fractions
+\usepackage{listings}
+\usepackage{enumerate}
+\usepackage{booktabs}
+\usepackage{siunitx}  % easy handling of value + unit (e.g. \SI{10}{\pF})
+% \sisetup{}  % configure siunitx (e.g. locale = DE)
+\usepackage{verbatim}
+\usepackage{subcaption}  % captions for subplots
+\usepackage[european, siunitx, RPvoltages]{circuitikz}  % draw circuit diagrams
+\usepackage{enumitem}
+\setlist[itemize]{label=\rule[0.5ex]{0.6ex}{0.6ex}} % nice black squares for itemize environments
+\usepackage{graphicx}
+\graphicspath{{./figures/}}
+
+\usepackage{geometry}
+\geometry{%
+	left   = 2.5cm,
+	right  = 2.5cm,
+	top    = 3cm,
+	bottom = 3cm
+}
+
+\usepackage[hang]{footmisc}
+\renewcommand{\hangfootparindent}{2em} 
+\renewcommand{\hangfootparskip}{2em}
+\renewcommand{\footnotemargin}{0.00001pt}
+\renewcommand{\footnotelayout}{\hspace{2em}}
+
+
+\title{376.054 Machine Vision and Cognitive Robotics\\
+	   Exercise 5: Plane fitting with RANSAC}
+\author{
+  Severin Jäger, 01613004
+}
+\date{\today}
+
+% last imports! Modify Title and author
+\usepackage[bookmarksopen,colorlinks,citecolor=black,linkcolor=black, urlcolor = black]{hyperref}
+% after hyperref! Example: In \cref{label}, ... -> In section 2.1, ...
+% works for all labels (figures, sections, chapters, equations, ...)
+\usepackage[noabbrev, nameinlink]{cleveref} 
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\pagebreak
+
+\section{Ground plane detection results}
+
+In the first step, the basic RANSAC algorithm was used to detect the ground plane in an image as
+shown in Figure \ref{ground_plane}. The plane was clearly detected, this is a reasonable start for segmenting the 
+objects on top of the plane. However, this is a rather simple point cloud consisting basically of one plane and a few small 
+objects atop.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=12cm]{basic_result.PNG}
+	\caption{Ground plane detection result with a confidence of $0.9$, an inlier threshold of \SI{2}{\cm},
+	 and a minimal sample distance of \SI{80}{\cm}}
+	\label{ground_plane}
+\end{figure}
+
+\section{Influence of RANSAC parameters}
+
+The RANSAC implementation used above has three major parameters: The inlier threshold which determines the maximum distance between 
+the plane and points to be considered inliers, the minimal sample distance, which determines if a random sample is discarded due 
+to the vicinity of the points and the confidence, which influences the termination of the RANSAC algorithm.
+
+Figure \ref{high_inlier_t} (a) shows exemplarily a too high value of the inlier threshold. As a result, major parts of the objects are 
+detected as part of the ground plane. This reduces the probability of correct segmentation an classification of the objects. However, 
+a too small value can lead to significant problems as well. As shown in Figure \ref{high_inlier_t} (b), this yields planes not containing 
+all relevant points due to sensor noise.
+
+The minimal sample distance has less influence on the quality of the detected plane. In rare cases, it is possible that very close points 
+lead to wrong planes, however the algorithm will find better results in later iterations.
+
+Tuning the confidence does not only affect the quality of the fitted plane, but also the runtime of the algorithm. On one hand, a sufficient 
+level is confidence is required for proper detection (s. Figure \ref{low_confidence}), on the other hand high values increase the number 
+of iterations and thus the runtime. Therefore, this parameter involves a tradeoff between accuracy and complexity.
+
+\begin{figure}
+	\begin{subfigure}[b]{0.49\textwidth}
+		\includegraphics[width=7.5cm]{high_5cm.PNG}
+		\centering
+		\subcaption{}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.49\textwidth}
+		\includegraphics[width=7.5cm]{low_inlier_t_2mm.PNG}
+		\centering
+		\subcaption{}
+	\end{subfigure}
+	\centering
+	
+	\caption{Ground plane detection with the parameters used for Figure \ref{ground_plane}, but an inlier threshold of \SI{5}{\cm} (a) and \SI{2}{\mm} (b).}
+	\label{high_inlier_t}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=12cm]{low_confidence.PNG}
+	\caption{Ground plane detection with the parameters used for Figure \ref{ground_plane}, but a confidence of $0.12$}
+	\label{low_confidence}
+\end{figure}
+
+\clearpage
+\section{Multi-plane detection results}
+
+\ref{door_basic}
+
+\ref{desk_basic}
+
+\ref{kitchen_basic}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=12cm]{door_basic.PNG}
+	\caption{with a confidence of $0.9$, an inlier threshold of \SI{5}{\cm},
+	and a minimal sample distance of \SI{30}{\cm}}
+	\label{door_basic}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=12cm]{desk_basic.PNG}
+	\caption{with a confidence of $0.9$, an inlier threshold of \SI{5}{\cm},
+	and a minimal sample distance of \SI{30}{\cm}}
+	\label{desk_basic}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=12cm]{kitchen_basic.PNG}
+	\caption{with a confidence of $0.9$, an inlier threshold of \SI{5}{\cm},
+	and a minimal sample distance of \SI{30}{\cm}}
+	\label{kitchen_basic}
+\end{figure}
+
+% down-sampling approaches (all previous: uniform down-sampling)
+
+\section{MSAC and MLESAC}
+
+
+\end{document}
