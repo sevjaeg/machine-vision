@@ -18,7 +18,7 @@ if __name__ == '__main__':
 
     #########################################################
     # RANSAC parameters:
-    confidence = 0.85
+    confidence = 0.9
     inlier_threshold = 0.02
     min_sample_distance = 0.8
     #########################################################
@@ -26,11 +26,11 @@ if __name__ == '__main__':
     #########################################################
     # Parameters to generate the test data
     a, b, c, d = 0, 0.2, 1, -2  # Plane parameters: a*x + b*y + c*z + d = 0
-    normal_prop = 0.95  # To what proportion of the generated points we add noise in z-direction
-    normal_std = 0.1  # The standard deviation of the Gaussian noise we add to normal_prop of the points
-    num_of_tests = 5000  # Number of tests: How often we try to fit the plane to the generated data
+    normal_prop = 1  # To what proportion of the generated points we add noise in z-direction
+    normal_std = 0.25  # The standard deviation of the Gaussian noise we add to normal_prop of the points
+    num_of_tests = 1000  # Number of tests: How often we try to fit the plane to the generated data
     plane_dimensions = 5  # The x,y-coordinates are uniformly sampled from the range [-plane_dimension, plane_dimension]
-    num_of_generated_points = 25000
+    num_of_generated_points = 10000
     #########################################################
 
     # Generate x and y coordinates in the defined range

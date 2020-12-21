@@ -117,16 +117,30 @@ of iterations and thus the runtime. Therefore, this parameter involves a tradeof
 \clearpage
 \section{Multi-plane detection results}
 
-\ref{door_basic}
+This section deals with detection of multiple planes in point clouds. As before, the basic RANSAC error function was 
+used. Figure \ref{door_basic} shows the 5 detected planes in the door point cloud. The most dominant planes (door in the front in red, 
+floor in yellow, left open door in blue, closed door in green) are detected nicely, however there are some interesting artifacts.
+Firstly, points belonging to the floor are mapped to the door in the front as this is the largest (and therefore initially detected) 
+plane. The blue plane shows a similar behaviour. Furthermore, the pink plane does hardly belong to any physical plane, but is the 
+best fit for the remaining data points (after removing the dominant planes). This can be avoided by increasing the number of points a plane 
+needs to be considered.
 
-\ref{desk_basic}
+In Figure \ref{desk_basic}, the planes detected in the desk point cloud are shown. Here the desk plane is detected correctly and the 
+three screens are detected as two planes. However, the algorithm detected a plane connecting the different structures in the background 
+which is likely to be an artifact caused by the viewpoint and the FOV. However, this plane again contains only a few data points.
 
-\ref{kitchen_basic}
+The results of the plane detection in the most complicated scene are shown in Figure \ref{kitchen_basic}. The most important 
+planes are still detected properly, however there are planes just fitting the points nicely but not corresponding to a physical plane as 
+well as data points matched to a plane without belonging to it (e.g. the items in the dishwasher). These two effects are hard to mitigate, 
+one approach might be discarding planes consisting of points being far apart, however this might lead to problems if other objects cover 
+parts of the plane. In general, different image structures require different parameters, this makes is hard to implement a well-scaling 
+detection.
+
 
 \begin{figure}
 	\centering
 	\includegraphics[width=12cm]{door_basic.PNG}
-	\caption{with a confidence of $0.9$, an inlier threshold of \SI{5}{\cm},
+	\caption{Detected planes in the door point cloud with a confidence of $0.9$, an inlier threshold of \SI{5}{\cm},
 	and a minimal sample distance of \SI{30}{\cm}}
 	\label{door_basic}
 \end{figure}
@@ -134,7 +148,7 @@ of iterations and thus the runtime. Therefore, this parameter involves a tradeof
 \begin{figure}
 	\centering
 	\includegraphics[width=12cm]{desk_basic.PNG}
-	\caption{with a confidence of $0.9$, an inlier threshold of \SI{5}{\cm},
+	\caption{Detected planes in the desk point cloud with a confidence of $0.9$, an inlier threshold of \SI{5}{\cm},
 	and a minimal sample distance of \SI{30}{\cm}}
 	\label{desk_basic}
 \end{figure}
@@ -142,14 +156,57 @@ of iterations and thus the runtime. Therefore, this parameter involves a tradeof
 \begin{figure}
 	\centering
 	\includegraphics[width=12cm]{kitchen_basic.PNG}
-	\caption{with a confidence of $0.9$, an inlier threshold of \SI{5}{\cm},
+	\caption{Detected planes in the kitchen point cloud with a confidence of $0.9$, an inlier threshold of \SI{5}{\cm},
 	and a minimal sample distance of \SI{30}{\cm}}
 	\label{kitchen_basic}
 \end{figure}
 
-% down-sampling approaches (all previous: uniform down-sampling)
+All images shown so far used a straightforward uniform down-sampling approach to reduce the computational complexity. This leads to 
+unpleasant artifacts such as the highly regular holes in the lower part of Figure \ref{door_basic}. However, there 
+are fancier techniques such as voxel-based down-sampling are available. This approach leads to smoother point clouds, nonetheless 
+the detection results are not significantly improved.
+
+One further remark regarding RANSAC has to be made: The detection results might strongly differ between consecutive experiments. This comes 
+from the randomness of the algorithm. It might come op with one plane in the first try and another one (with a similar number of points) 
+in the next attempt. This particularly happens if there are no obvious planes in the point cloud.
 
 \section{MSAC and MLESAC}
+RANSAC follows a very simple approach and gives the error function as number of inliers. This leaves room for improvement by assigning 
+each point a weight depending on its proximity to the estimated plane. MSAC and MLESAC follow this approach. 
 
+To compare the performance of these algorithms, the following experiment was conducted: A plane was generated and noise with $\sigma = \SI{25}{\cm}$ 
+was added. Then the best plane was fitted with all three error functions $1000$ times respectively with a confidence of $0.9$, an inlier threshold 
+of \SI{2}{\cm} and a minimum sample distance of \SI{80}{\cm} The distributions of the resulting 
+angular and z-direction errors are shown in Figures \ref{angle_error} and \ref{z_error}. The first observation is that the differences 
+between the approaches is rather small. Despite the significantly increased complexity of the algorithm, the performance of MLESAC is just 
+slightly better than what the simpler approaches achieve. Nonetheless, the average angular and z-direction error of MLESAC is the 
+smallest and MSAC performs better than RANSAC in both metrics. So from the accuracy point of view, there is no point to use RANSAC in 
+favor of the (similarly easy to calculate) MSAC. In case the estimation accuracy is of utmost importance, MLESAC can be considered.
+
+This observation is also backed by the fact, that the convergence speed (expressed in number of iterations) hardly differs (s. Figure \ref{iterations}).
+Again, MLESAC and MSAC perform slightly better, however the increased computational complexity (mainly of MLESAC) is likely to compensate this.
+
+
+
+\begin{figure}
+	\centering
+	\includegraphics[width=13cm]{Angle_Error.png}
+	\caption{}
+	\label{angle_error}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=13cm]{Z_Error.png}
+	\caption{}
+	\label{z_error}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=13cm]{iterations.png}
+	\caption{}
+	\label{iterations}
+\end{figure}
 
 \end{document}

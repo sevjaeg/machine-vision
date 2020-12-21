@@ -53,8 +53,8 @@ def fit_plane(pcd: o3d.geometry.PointCloud,
     min_error = np.inf
     best_plane = np.array([0., 1., 0., 0.])
     best_inliers = np.full(number_of_points, False)
-    correct_prob = 1
-    while correct_prob >= (1-confidence):
+    error_prob = 1
+    while error_prob >= (1-confidence):
         p1 = points[np.random.randint(0, number_of_points), :]
         p2 = points[np.random.randint(0, number_of_points), :]
         p3 = points[np.random.randint(0, number_of_points), :]
@@ -89,7 +89,7 @@ def fit_plane(pcd: o3d.geometry.PointCloud,
             eps = no_inliers/number_of_points
 
         num_iterations = num_iterations + 1
-        correct_prob = (1 - eps ** 3) ** num_iterations
+        error_prob = (1 - eps ** 3) ** num_iterations
         # print("Max dist", np.max(distances))
         # print("Inliers", no_inliers)
         # print("Error", error)
@@ -160,6 +160,7 @@ def filter_planes(pcd: o3d.geometry.PointCloud,
                                                 min_sample_distance, error_func)
         if sum(best_inliers) < min_points_prop * no_points:
             print(str(len(plane_eqs)) + " planes detected")
+            # return [], [], pcd  # original pcd
             return plane_eqs, plane_pcds, filtered_pcd
         list_remainder = np.argwhere(np.invert(best_inliers)).flatten().tolist()
         list_plane = np.argwhere(best_inliers).flatten().tolist()

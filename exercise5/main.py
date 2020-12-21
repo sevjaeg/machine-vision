@@ -27,8 +27,8 @@ if __name__ == '__main__':
 
     #########################################################
     # RANSAC parameters:
-    confidence = 0.12
-    inlier_threshold = 0.002
+    confidence = 0.90
+    inlier_threshold = 0.02
     min_sample_distance = 0.8
     error_functions = [ransac_error, msac_error, mlesac_error]
     error_function_idx = 0
@@ -43,8 +43,9 @@ if __name__ == '__main__':
         raise FileNotFoundError("Couldn't load pointcloud in " + str(current_path))
 
     # Down-sample the loaded point cloud to reduce computation time
-    pcd_sampled = pcd.uniform_down_sample(12)
-    # pcd_sampled = pcd.voxel_down_sample(voxel_size=voxel_size)
+    # pcd_sampled = pcd.uniform_down_sample(12)
+    pcd_sampled = pcd.voxel_down_sample(voxel_size=voxel_size)
+
 
     # Apply plane-fitting algorithm
     best_plane, best_inliers, num_iterations = fit_plane(pcd=pcd_sampled,
@@ -59,7 +60,7 @@ if __name__ == '__main__':
     #########################################################
     # Multi-Plane parameters
     multi_plane_names = ['desk', 'door', 'kitchen']
-    multi_plane_idx = 2
+    multi_plane_idx = 1
 
     # RANSAC parameters:
     min_points_prop = 0.05
@@ -81,6 +82,7 @@ if __name__ == '__main__':
     # Down-sample the loaded point cloud to reduce computation time
     pcd_multi_sampled = pcd_multi.uniform_down_sample(10)
     # pcd_multi_sampled = pcd_multi.voxel_down_sample(voxel_size=voxel_size_multi)
+    # pcd_multi_sampled = pcd_multi
 
     plane_eqs, plane_pcds, filtered_pcd = filter_planes(pcd=pcd_multi_sampled,
                                                         min_points_prop=min_points_prop,
