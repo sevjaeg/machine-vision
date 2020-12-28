@@ -26,12 +26,15 @@ fy_d = 5.8269103270988637e+02
 cx_d = 3.1304475870804731e+02
 cy_d = 2.3844389626620386e+02
 
-# RGB Distortion Parameters
+# Depth Distortion Parameters
 k1_d = -9.9897236553084481e-02
 k2_d = 3.9065324602765344e-01
 p1_d = 1.9290592870229277e-03
 p2_d = -1.9422022475975055e-03
 k3_d = -5.1031725053400578e-01
+
+
+A_d = np.array([[fx_d, 0, cx_d], [0, fy_d, cy_d], [0, 0, 1]])
 
 # Rotation
 R = -np.array([9.9997798940829263e-01,  5.0518419386157446e-03, 4.3011152014118693e-03,
@@ -45,6 +48,8 @@ R = np.linalg.inv(R.T)
 t_x = 2.5031875059141302e-02
 t_z = -2.9342312935846411e-04
 t_y = 6.6238747008330102e-04
+
+Rt = np.c_[R, np.array([[t_x], [t_y], [t_z]])]
 
 # Parameters for making depth absolute.
 depth_param1 = 351.3

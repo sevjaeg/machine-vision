@@ -88,7 +88,7 @@ lead to wrong planes, however the algorithm will find better results in later it
 
 Tuning the confidence does not only affect the quality of the fitted plane, but also the runtime of the algorithm. On one hand, a sufficient 
 level is confidence is required for proper detection (s. Figure \ref{low_confidence}), on the other hand high values increase the number 
-of iterations and thus the runtime. Therefore, this parameter involves a tradeoff between accuracy and complexity.
+of iterations and thus the runtime. Therefore, this parameter involves a trade-off between accuracy and complexity.
 
 \begin{figure}
 	\begin{subfigure}[b]{0.49\textwidth}
@@ -119,7 +119,7 @@ of iterations and thus the runtime. Therefore, this parameter involves a tradeof
 
 This section deals with detection of multiple planes in point clouds. As before, the basic RANSAC error function was 
 used. Figure \ref{door_basic} shows the 5 detected planes in the door point cloud. The most dominant planes (door in the front in red, 
-floor in yellow, left open door in blue, closed door in green) are detected nicely, however there are some interesting artifacts.
+floor in yellow, left open door in blue, closed door in green) are detected nicely, however there are some interesting artefacts.
 Firstly, points belonging to the floor are mapped to the door in the front as this is the largest (and therefore initially detected) 
 plane. The blue plane shows a similar behaviour. Furthermore, the pink plane does hardly belong to any physical plane, but is the 
 best fit for the remaining data points (after removing the dominant planes). This can be avoided by increasing the number of points a plane 
@@ -127,7 +127,7 @@ needs to be considered.
 
 In Figure \ref{desk_basic}, the planes detected in the desk point cloud are shown. Here the desk plane is detected correctly and the 
 three screens are detected as two planes. However, the algorithm detected a plane connecting the different structures in the background 
-which is likely to be an artifact caused by the viewpoint and the FOV. However, this plane again contains only a few data points.
+which is likely to be an artefact caused by the viewpoint and the FOV. However, this plane again contains only a few data points.
 
 The results of the plane detection in the most complicated scene are shown in Figure \ref{kitchen_basic}. The most important 
 planes are still detected properly, however there are planes just fitting the points nicely but not corresponding to a physical plane as 
@@ -162,7 +162,7 @@ detection.
 \end{figure}
 
 All images shown so far used a straightforward uniform down-sampling approach to reduce the computational complexity. This leads to 
-unpleasant artifacts such as the highly regular holes in the lower part of Figure \ref{door_basic}. However, there 
+unpleasant artefacts such as the highly regular holes in the lower part of Figure \ref{door_basic}. However, there 
 are fancier techniques such as voxel-based down-sampling are available. This approach leads to smoother point clouds, nonetheless 
 the detection results are not significantly improved.
 
@@ -181,7 +181,7 @@ angular and z-direction errors are shown in Figures \ref{angle_error} and \ref{z
 between the approaches is rather small. Despite the significantly increased complexity of the algorithm, the performance of MLESAC is just 
 slightly better than what the simpler approaches achieve. Nonetheless, the average angular and z-direction error of MLESAC is the 
 smallest and MSAC performs better than RANSAC in both metrics. So from the accuracy point of view, there is no point to use RANSAC in 
-favor of the (similarly easy to calculate) MSAC. In case the estimation accuracy is of utmost importance, MLESAC can be considered.
+favour of the (similarly easy to calculate) MSAC. In case the estimation accuracy is of utmost importance, MLESAC can be considered.
 
 This observation is also backed by the fact, that the convergence speed (expressed in number of iterations) hardly differs (s. Figure \ref{iterations}).
 Again, MLESAC and MSAC perform slightly better, however the increased computational complexity (mainly of MLESAC) is likely to compensate this.

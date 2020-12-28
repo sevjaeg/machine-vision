@@ -43,8 +43,9 @@ if __name__ == '__main__':
         raise FileNotFoundError("Couldn't load pointcloud in " + str(current_path))
 
     # Down-sample the loaded point cloud to reduce computation time
+    pcd_sampled = pcd
     # pcd_sampled = pcd.uniform_down_sample(12)
-    pcd_sampled = pcd.voxel_down_sample(voxel_size=voxel_size)
+    # pcd_sampled = pcd.voxel_down_sample(voxel_size=voxel_size)
 
 
     # Apply plane-fitting algorithm
