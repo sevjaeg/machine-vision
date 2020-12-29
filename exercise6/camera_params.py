@@ -34,7 +34,7 @@ p2_d = -1.9422022475975055e-03
 k3_d = -5.1031725053400578e-01
 
 
-A_d = np.array([[fx_d, 0, cx_d], [0, fy_d, cy_d], [0, 0, 1]])
+K = np.array([[fx_d, 0, cx_d, 0], [0, fy_d, cy_d, 0], [0, 0, 1, 0]])
 
 # Rotation
 R = -np.array([9.9997798940829263e-01,  5.0518419386157446e-03, 4.3011152014118693e-03,
@@ -50,6 +50,7 @@ t_z = -2.9342312935846411e-04
 t_y = 6.6238747008330102e-04
 
 Rt = np.c_[R, np.array([[t_x], [t_y], [t_z]])]
+world_to_cam = np.r_[Rt, [np.array([0, 0, 0, 1])]]
 
 # Parameters for making depth absolute.
 depth_param1 = 351.3
