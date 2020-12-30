@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-""" Helper functions
+""" Helper functions for displaying images and point clouds
 
 Author: Severin Jäger
 MatrNr: 01613004

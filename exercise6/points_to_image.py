@@ -52,6 +52,6 @@ def create_image_from_pcd(pcd, downsampling=1, show=False):
 
     if show:
         print("created an " + str(image_size) + " image")
-        show_image(image, "a", save_image=True)
+        show_image(image, "Image from pcd", save_image=False)
 
     return image

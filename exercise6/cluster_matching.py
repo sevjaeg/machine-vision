@@ -24,8 +24,7 @@ def map_matches_to_cluster(matches, keypoints, cluster, max_label, image_cluster
     """
     d = int((neighbourhood-1)/2)
     ret = 0
-    for m in matches:
-        match = m[0]
+    for match in matches:
         kp = keypoints[match.trainIdx]
         position = tuple(np.round(kp.pt).astype(np.int))
         is_valid = False
@@ -70,6 +69,7 @@ def is_border_pixel(position, image):
     return x < 0 or y < 0 or x >= x_max or y >= y_max
 
 
+# TODO sometimes erroneous
 def get_cluster_coordinates(image_clusters, max_label, cmap):
     """
     Calculates the center coordinates of all clusters in the given image
@@ -83,7 +83,8 @@ def get_cluster_coordinates(image_clusters, max_label, cmap):
     centers = np.zeros((size, 2))
     for i in range(size):
         colour = np.multiply(cmap(labels[i] / (max_label if max_label > 0 else 1)), 255).astype(np.uint8)[:3][..., ::-1]
-        pos = np.argwhere(image_clusters == colour)
-        centers[i] = np.average(pos[:, (0, 1)], axis=0)
+        indices = np.where(np.all(image_clusters == colour, axis=-1))
+        pos = np.asarray([indices[0].T, indices[1].T]).T
+        centers[i] = np.median(pos, axis=0).astype(np.int)
     return centers
 
