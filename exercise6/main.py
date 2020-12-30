@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-""" Open Challenge Main
+""" Open Challenge Main Function
 
 Author: Severin Jäger
 MatrNr: 01613004
@@ -13,87 +13,13 @@ import cv2
 import open3d as o3d
 import matplotlib.pyplot as plt
 
-from util import  *
+from util import *
 from points_to_image import *
 from cluster_matching import *
 
 debug = False
 
-if __name__ == '__main__':
-    # Load test point cloud
-    current_path = Path(__file__).parent
-    pcd = o3d.io.read_point_cloud(str(current_path.joinpath("test/image003.pcd")))
-    if not pcd.has_points():
-        raise FileNotFoundError("Couldn't load pointcloud in " + str(current_path))
-
-    # 1. Remove ground plane
-    # Parameters ############
-    ransac_inlier_dist = 0.018
-    ransac_iterations = 10000
-    #########################
-    ground_plane_model, ground_plane_inliers = pcd.segment_plane(distance_threshold=ransac_inlier_dist,
-                                                                 ransac_n=3,
-                                                                 num_iterations=ransac_iterations)
-
-    ground_plane_pcd = copy.deepcopy(pcd.select_by_index(ground_plane_inliers))
-    ground_plane_pcd.paint_uniform_color([1.0, 0, 0])
-    objects_pcd = pcd.select_by_index(ground_plane_inliers, invert=True)
-
-    if debug:
-        plot_pcds([ground_plane_pcd, copy.deepcopy(objects_pcd)])
-
-    # 2. Project remaining points to 2D image
-    # Parameters ############
-    downsampling_coefficient = 1.12
-    #########################
-
-    image = create_image_from_pcd(objects_pcd, downsampling=downsampling_coefficient, show=debug)
-
-    # 3. Clustering of the 3D space
-    # Parameters ############
-    dbscan_eps = 0.025
-    dbscan_min_points = 70
-    voxel_size = 0.005
-    #########################
-    # Down-sample the object point cloud to reduce computation time
-    pcd_sampled = objects_pcd.voxel_down_sample(voxel_size=voxel_size)
-    with o3d.utility.VerbosityContextManager(
-            o3d.utility.VerbosityLevel.Debug) as cm:
-        labels = np.array(
-            pcd_sampled.cluster_dbscan(eps=dbscan_eps, min_points=dbscan_min_points, print_progress=debug))
-
-    max_label = labels.max()
-    no_clusters = max_label + 1
-    print(f"{no_clusters} clusters detected")
-
-    colourmap = plt.get_cmap("tab20")
-    cluster_colours = colourmap(labels / (max_label if max_label > 0 else 1))
-    cluster_colours[labels < 0] = 0
-    pcd_sampled.colors = o3d.utility.Vector3dVector(cluster_colours[:, :3])
-
-    if debug:  # from open3d example
-        o3d.visualization.draw_geometries([pcd_sampled])
-
-
-
-    # 4. Project labels to 2D image
-    # Parameters ############
-    kernel_size = 7
-    #########################
-    image_labels = create_image_from_pcd(pcd_sampled, downsampling=downsampling_coefficient, show=debug)
-    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(kernel_size,kernel_size))
-    image_labels_filled = cv2.morphologyEx(image_labels, cv2.MORPH_CLOSE, kernel)
-
-    if debug:
-        show_image(image_labels_filled, "filled")
-
-    # 5. Match features
-    # Parameters ############
-    sift_threshold = 350
-    min_matches = 4
-    #########################
-
-    categories = {
+categories = {
         0: 'unknown',
         1: 'book',
         2: 'cookiebox',
@@ -103,6 +29,91 @@ if __name__ == '__main__':
         6: 'sweets',
         7: 'tea'
     }
+
+if __name__ == '__main__':
+    # Load test point cloud
+    current_path = Path(__file__).parent
+    pcd = o3d.io.read_point_cloud(str(current_path.joinpath("test/image002.pcd")))
+    if not pcd.has_points():
+        raise FileNotFoundError("Couldn't load pointcloud in " + str(current_path))
+
+    # 1. Remove ground plane
+    # Parameters ############
+    ransac_inlier_dist = 0.02
+    ransac_iterations = 5000
+    #########################
+    ground_plane_model, ground_plane_inliers = pcd.segment_plane(distance_threshold=ransac_inlier_dist,
+                                                                 ransac_n=3,
+                                                                 num_iterations=ransac_iterations)
+    ground_plane_pcd = pcd.select_by_index(ground_plane_inliers)
+    ground_plane_pcd.paint_uniform_color([1.0, 0, 0])
+    objects_pcd = pcd.select_by_index(ground_plane_inliers, invert=True)
+
+    if debug:
+        plot_pcds([ground_plane_pcd, copy.deepcopy(objects_pcd)])  # pass copy as the colours are modified
+
+    # 2. Project remaining points to 2D image
+    # Parameters ############
+    #########################
+    image = create_image_from_pcd(objects_pcd, show=debug)
+
+    # 3. Clustering of the 3D space
+    # Parameters ############
+    dbscan_eps = 0.022
+    dbscan_min_points = 100
+    cluster_min_points = 400
+    voxel_size = 0.002
+    #########################
+    # Down-sample the object point cloud to reduce computation time
+    pcd_sampled = objects_pcd.voxel_down_sample(voxel_size=voxel_size)
+
+    labels = np.array(pcd_sampled.cluster_dbscan(eps=dbscan_eps, min_points=dbscan_min_points, print_progress=False))
+    max_label = labels.max()
+
+    # remove small clusters (this yiels better results than a high min_points value for the dbscan)
+    for cluster in range(max_label + 1):
+        if np.count_nonzero(labels == cluster) < cluster_min_points:
+            labels[np.argwhere(labels == cluster)] = 0
+            max_label -= 1
+
+    no_clusters = max_label + 1
+
+    # color the labels in the point cloud (these colours are used as label encoding in the following)
+    colour_map = plt.get_cmap("tab20")
+    cluster_colours = colour_map(labels / (max_label if max_label > 0 else 1))
+    cluster_colours[labels < 0] = 0
+    pcd_sampled.colors = o3d.utility.Vector3dVector(cluster_colours[:, :3])
+
+    print(f"{no_clusters} clusters detected")
+    if debug:
+        o3d.visualization.draw_geometries([pcd_sampled])
+
+    # 4. Project clusters to 2D image
+    # Parameters ############
+    kernel_size = 7
+    #########################
+    image_labels = create_image_from_pcd(pcd_sampled, show=False)
+    # Fill the holes
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (kernel_size, kernel_size))
+    image_labels_filled = cv2.morphologyEx(image_labels, cv2.MORPH_CLOSE, kernel)
+    cluster_centers = get_cluster_coordinates(image_labels_filled, max_label, colour_map)
+
+    if debug:
+        image_labels_filled_debug = copy.deepcopy(image_labels_filled)
+        for i in range(no_clusters):
+            image_labels_filled_debug = cv2.putText(image_labels_filled_debug, str(i),
+                                                    tuple(np.flip(cluster_centers[i, :]).astype(np.int)),
+                                                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 1, cv2.LINE_AA)
+        show_image(image_labels_filled_debug, "filled")
+
+    # 5. Match features
+    # Parameters ############
+    sift_threshold = 350
+    min_matches = 4
+    neighbourhood_size = 5
+    #########################
+    # data structure holding the classification results of the cluster
+    # for each cluster, there is a tuple (category, category rating)
     matching_results = no_clusters * [(0, 0.0)]
 
     sift = cv2.SIFT_create()
@@ -116,7 +127,8 @@ if __name__ == '__main__':
         training_pcd = o3d.io.read_point_cloud(str(current_path.joinpath(path)))
         if not training_pcd.has_points():
             raise FileNotFoundError("Couldn't load pointcloud in " + str(current_path.joinpath(path)))
-        training_image = create_image_from_pcd(training_pcd, downsampling=downsampling_coefficient, show=False)
+        # convert the point cloud to an image
+        training_image = create_image_from_pcd(training_pcd, show=False)
 
         # Interest points in the training image
         training_gray = cv2.cvtColor(training_image, cv2.COLOR_BGR2GRAY)
@@ -132,20 +144,23 @@ if __name__ == '__main__':
         matches_filtered = list(filter(lambda x: x[0].distance <= sift_threshold, matches))
         total_matches = len(matches_filtered)
 
+        # get category from file name
         cat_str = ''.join(list(filter(lambda c: c.isalpha(), path.stem)))
         category = list(categories.keys())[list(categories.values()).index(cat_str)]
-        if debug:
+        if False:
             print("category: " + str(categories[category]))
 
         for cluster in range(no_clusters):
-            no_matches = map_matches_to_cluster(matches_filtered, scene_kp, cluster, max_label, image_labels_filled, colourmap)
+            # calculate the matching metric (ration between matches and total matches)
+            # between the training image and each cluster
+            no_matches = map_matches_to_cluster(matches_filtered, scene_kp, cluster, max_label, image_labels_filled,
+                                                colour_map, neighbourhood=neighbourhood_size)
             ratio = no_matches/total_matches if total_matches > 0 else 0.9
             if no_matches >= min_matches and ratio >= matching_results[cluster][1]:
+                # keep the best match
                 matching_results[cluster] = (category, ratio)
-            if debug:
-                print("cluster " + str(cluster) + ": " + str(no_matches) + " matches")
 
-        if debug:
+        if False:  # plot matches
             match_mask = np.ones(np.array(matches_filtered).shape, dtype=np.int)
             draw_params = dict(matchesMask=match_mask,
                                flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
@@ -158,18 +173,11 @@ if __name__ == '__main__':
                                              **draw_params)
             show_image(matches_img, "Matches")
 
-    cluster_centers = get_cluster_coordinates(image_labels_filled, max_label, colourmap)
-
+    # print result and create image annotations
     for cluster in range(no_clusters):
         cat, perc = matching_results[cluster]
-        col = np.multiply(colourmap(cluster / (max_label if max_label > 0 else 1)), 255).astype(np.uint8)[:3][..., ::-1]
-        im_c = np.where(image_labels_filled == col, image_labels_filled, np.array([0, 0, 0]).astype(np.uint8))
         print(categories[cat], perc)
         image = cv2.putText(image, categories[cat], tuple(np.flip(cluster_centers[cluster, :]).astype(np.int)),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 1, cv2.LINE_AA)
-
     show_image(image, "Results")
 
-
-# TODO tune clusters
-# TODO low matching rate -> unknown

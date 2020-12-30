@@ -1,61 +1,89 @@
 # -*- coding: utf-8 -*-
 
-""" Functions to convert point clouds to images
+""" Functions for cluster handling
 
 Author: Severin Jäger
 MatrNr: 01613004
 """
 
-from typing import List, Tuple
-
 import numpy as np
-import open3d as o3d
-import matplotlib.pyplot as plt
-import cv2
 
 
-def map_matches_to_cluster(matches, keypoints, cluster, max_label, image_clusters, cmap):
+def map_matches_to_cluster(matches, keypoints, cluster, max_label, image_clusters, cmap, neighbourhood=3):
+    """
+    Calculates the number of matches connected to a given cluster within an image
+
+    :param matches:
+    :param keypoints:
+    :param cluster:
+    :param max_label:
+    :param image_clusters:
+    :param cmap:
+    :param neighbourhood:
+    :return:
+    """
+    d = int((neighbourhood-1)/2)
     ret = 0
     for m in matches:
         match = m[0]
         kp = keypoints[match.trainIdx]
         position = tuple(np.round(kp.pt).astype(np.int))
         is_valid = False
-        for u in [-1, 0, 1]:
-            for v in [-1, 0, 1]:
+        for u in range(-d, d+1):        # consider all pixels within the neighbourhood (as edges might be located just
+            for v in range(-d, d+1):    # outside a cluster)
                 x, y = position
                 x = x + u
                 y = y + v
-                is_valid = is_in_cluster((x, y), cluster, max_label, image_clusters, cmap) or is_valid
+                if not is_border_pixel((x, y), image_clusters):  # skip pixels outside the image
+                    is_valid = is_in_cluster((x, y), cluster, max_label, image_clusters, cmap) or is_valid
         if is_valid:
-            # TODO weights
-            # print(position, cluster)
-            ret += 1
-
+            ret += 1  # count inliers
     return ret
 
 
 def is_in_cluster(position, cluster, max_label, image_clusters, cmap):
+    """
+    Checks whether a given pixel is part of a specific cluster in an image
+    :param position:
+    :param cluster:
+    :param max_label:
+    :param image_clusters:
+    :param cmap:
+    :return:
+    """
     colour = np.multiply(cmap(cluster/(max_label if max_label > 0 else 1)), 255).astype(np.uint8)[:3][..., ::-1]
     y, x = position
     pixel = image_clusters[x, y]
-    #print(position)
-    #print(pixel)
     return np.all(pixel == colour)
 
 
 def is_border_pixel(position, image):
-    return False
+    """
+    Checks whether a given position is inside the passed image
+    :param position:
+    :param image:
+    :return:
+    """
+    x, y = position
+    x_max = image.shape[1]
+    y_max = image.shape[0]
+    return x < 0 or y < 0 or x >= x_max or y >= y_max
 
 
 def get_cluster_coordinates(image_clusters, max_label, cmap):
+    """
+    Calculates the center coordinates of all clusters in the given image
+    :param image_clusters:
+    :param max_label:
+    :param cmap:
+    :return:
+    """
     size = max_label + 1
     labels = np.array(range(size))
     centers = np.zeros((size, 2))
     for i in range(size):
         colour = np.multiply(cmap(labels[i] / (max_label if max_label > 0 else 1)), 255).astype(np.uint8)[:3][..., ::-1]
         pos = np.argwhere(image_clusters == colour)
-        centers[i] = np.average(pos[:,(0,1)], axis=0)
+        centers[i] = np.average(pos[:, (0, 1)], axis=0)
     return centers
-
 

@@ -6,14 +6,20 @@ Author: Severin Jäger
 MatrNr: 01613004
 """
 
-from typing import List, Tuple
+from typing import List
 
 import numpy as np
 import open3d as o3d
 import matplotlib.pyplot as plt
 import cv2
 
+
 def plot_pcds(plane_pcds: List[o3d.geometry.PointCloud]) -> None:
+    """
+    Plot multiple point clouds in different colours
+    :param plane_pcds:
+    :return:
+    """
     colormap = plt.cm.get_cmap("gist_rainbow", len(plane_pcds))
     # Color the individual plane pointclouds in different colors
     for i, plane_pcd in enumerate(plane_pcds):
@@ -74,9 +80,5 @@ def show_image(img: np.array, title: str, save_image: bool = False, use_matplotl
         cv2.waitKey(0)
 
     if save_image:
-        #if is_color:
-        #    png_img = (cv2.cvtColor(img, cv2.COLOR_BGR2BGRA) * 255.).astype(np.uint8)
-        #else:
-        #    png_img = (cv2.cvtColor(img, cv2.COLOR_GRAY2BGRA) * 255.).astype(np.uint8)
         cv2.imwrite(title.replace(" ", "_") + ".png", img)
 
