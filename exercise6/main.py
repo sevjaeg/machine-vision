@@ -10,6 +10,7 @@ from pathlib import Path
 import copy
 import functools
 import operator
+import time
 import numpy as np
 import cv2
 import open3d as o3d
@@ -18,6 +19,8 @@ import matplotlib.pyplot as plt
 from util import *
 from points_to_image import *
 from cluster_matching import *
+
+# TODO division by 0
 
 debug = False
 
@@ -33,6 +36,8 @@ categories = {
     }
 
 if __name__ == '__main__':
+    start = time.time()
+
     # Load test point cloud
     current_path = Path(__file__).parent
     pcd = o3d.io.read_point_cloud(str(current_path.joinpath("test/image005.pcd")))
@@ -41,8 +46,8 @@ if __name__ == '__main__':
 
     # 1. Remove ground plane
     # Parameters ############
-    ransac_inlier_dist = 0.02
-    ransac_iterations = 10000
+    ransac_inlier_dist = 0.01
+    ransac_iterations = 5000
     #########################
     ground_plane_model, ground_plane_inliers = pcd.segment_plane(distance_threshold=ransac_inlier_dist,
                                                                  ransac_n=3,
@@ -59,7 +64,6 @@ if __name__ == '__main__':
     #########################
     image = create_image_from_pcd(objects_pcd, show=debug)
 
-    # TODO still room for improvement
     # 3. Clustering of the 3D space
     # Parameters ############
     dbscan_eps = 0.02
@@ -91,15 +95,16 @@ if __name__ == '__main__':
             left_clusters.append(cluster)
 
     # clean up labels (keep between 0 and the new max_label)
+    labels_filtered = copy.deepcopy(labels)
     for i, left_cluster in enumerate(left_clusters):
-        labels[np.argwhere(labels == i)] = left_cluster
+        labels_filtered[np.argwhere(labels == left_cluster)] = i
     no_clusters = len(left_clusters)
     max_label = no_clusters - 1
 
     # color the labels in the point cloud (these colours are used as label encoding in the following)
     colour_map = plt.get_cmap("tab20")
-    cluster_colours = colour_map(labels / (max_label if max_label > 0 else 1))[:, :3]
-    cluster_colours[labels < 0] = 0
+    cluster_colours = colour_map(labels_filtered / (max_label if max_label > 0 else 1))[:, :3]
+    cluster_colours[labels_filtered < 0] = 0
     pcd_sampled.colors = o3d.utility.Vector3dVector(cluster_colours)
 
     print(f"{no_clusters} clusters remaining")
@@ -115,9 +120,11 @@ if __name__ == '__main__':
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (kernel_size, kernel_size))
     image_labels_filled = cv2.morphologyEx(image_labels, cv2.MORPH_CLOSE, kernel)
 
+
+
     # calculate cluster centers for labels
     cluster_centers = get_cluster_coordinates(image_labels_filled, max_label, colour_map)
-    if debug:
+    if True: # TODO
         image_labels_filled_debug = copy.deepcopy(image_labels_filled)
         for i in range(no_clusters):
             image_labels_filled_debug = cv2.putText(image_labels_filled_debug, str(i),
@@ -125,8 +132,10 @@ if __name__ == '__main__':
                                                     cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 1, cv2.LINE_AA)
         show_image(image_labels_filled_debug, "filled")
 
+
+    exit(0)
+
     # 5. Match features
-    # TODO play with params
     # Parameters ############
     sift_threshold = 350
     min_matches = 4
@@ -198,4 +207,8 @@ if __name__ == '__main__':
         print(categories[cat], perc)
         image = cv2.putText(image, categories[cat], tuple(np.flip(cluster_centers[cluster, :]).astype(np.int)),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 1, cv2.LINE_AA)
+    end = time.time()
+    span = end - start
+    print("{:.2f} s".format(span))
+
     show_image(image, "Results")

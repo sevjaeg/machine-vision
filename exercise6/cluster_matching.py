@@ -22,25 +22,18 @@ def map_matches_to_cluster(matches, keypoints, cluster, max_label, image_cluster
     :param neighbourhood:
     :return:
     """
-    d = int((neighbourhood-1)/2)
+
     ret = 0
     for match in matches:
         kp = keypoints[match.trainIdx]
-        position = tuple(np.round(kp.pt).astype(np.int))
-        is_valid = False
-        for u in range(-d, d+1):        # consider all pixels within the neighbourhood (as edges might be located just
-            for v in range(-d, d+1):    # outside a cluster)
-                x, y = position
-                x = x + u
-                y = y + v
-                if not is_border_pixel((x, y), image_clusters):  # skip pixels outside the image
-                    is_valid = is_in_cluster((x, y), cluster, max_label, image_clusters, cmap) or is_valid
+        x, y = tuple(np.round(kp.pt).astype(np.int))
+        is_valid = is_in_cluster((x, y), cluster, max_label, image_clusters, cmap, neighbourhood)
         if is_valid:
             ret += 1  # count inliers
     return ret
 
 
-def is_in_cluster(position, cluster, max_label, image_clusters, cmap):
+def is_in_cluster(position, cluster, max_label, image_clusters, cmap, neighbourhood):
     """
     Checks whether a given pixel is part of a specific cluster in an image
     :param position:
@@ -50,10 +43,13 @@ def is_in_cluster(position, cluster, max_label, image_clusters, cmap):
     :param cmap:
     :return:
     """
+
+    #if not is_border_pixel((x, y), image_clusters):  # skip pixels outside the image
+    d = int((neighbourhood - 1) / 2)
     colour = np.multiply(cmap(cluster/(max_label if max_label > 0 else 1)), 255).astype(np.uint8)[:3][..., ::-1]
     y, x = position
-    pixel = image_clusters[x, y]
-    return np.all(pixel == colour)
+    pixel = image_clusters[x-d:x+d+1, y-d:y+d+1]
+    return np.any(np.all(pixel == colour, axis=2))
 
 
 def is_border_pixel(position, image):
@@ -69,7 +65,6 @@ def is_border_pixel(position, image):
     return x < 0 or y < 0 or x >= x_max or y >= y_max
 
 
-# TODO sometimes erroneous
 def get_cluster_coordinates(image_clusters, max_label, cmap):
     """
     Calculates the center coordinates of all clusters in the given image

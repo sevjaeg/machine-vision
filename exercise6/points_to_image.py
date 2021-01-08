@@ -16,6 +16,7 @@ import cv2
 from camera_params import *
 from util import *
 
+
 def calculate_pixel_positions(pcd):
     """
     Calculate the pixel positions of each point in the point cloud
@@ -32,6 +33,7 @@ def calculate_pixel_positions(pcd):
     pixels[1, :] += np.max(-pixels[1, :])
 
     return pixels
+
 
 def create_image_from_pcd(pcd, downsampling=1, show=False):
     """
