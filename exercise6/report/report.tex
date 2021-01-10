@@ -5,6 +5,7 @@
 \usepackage[english]{babel}
 
 \usepackage{lmodern}  % nicer font
+\usepackage{textcomp}
 \usepackage{gensymb}
 \usepackage{amsmath}
 \usepackage{amssymb}
@@ -343,13 +344,6 @@ This extension can be enabled by setting the parameter \verb|use_colour_sift| in
 	\label{rgb2}
 \end{figure}
 
-\begin{figure}
-	\centering
-	\includegraphics[width=11cm]{rgb3.PNG}
-	\caption{Recognition results for point cloud 3 with RGB SIFT}
-	\label{rgb3}
-\end{figure}
-
 \clearpage
 \section{Evaluation}
 
@@ -370,9 +364,11 @@ This extension can be enabled by setting the parameter \verb|use_colour_sift| in
 	Sugar & 10 & 0 & 3 \\
 	Sweets & 5 & 5 & 1\\
 	Tea & 6 & 4 & 1\\
+	\midrule
+	Total & 48 & 15 & 15\\
 	\bottomrule
 	\end{tabular}
-	\caption{}
+	\caption{Recognition results with the basic pipeline}
 	\label{tab}
 \end{table}
 
@@ -382,17 +378,27 @@ This extension can be enabled by setting the parameter \verb|use_colour_sift| in
 	\toprule
 	Object & Correct & False negative  & False positive \\
 	\midrule
-	Book & 2 & 2 & 0 \\
+	Book & 2 & 0 & 0 \\
 	Cookie Box & 10 & 0 & 0 \\
 	Cup & 7 & 5 & 5 \\
 	Ketchup & 8 & 2 & 2 \\
 	Sugar & 10 & 0 & 5 \\
 	Sweets & 9 & 1 & 0 \\
 	Tea & 6 & 4 & 0\\
+	\midrule
+	Total & 52 & 12 & 12\\
 	\bottomrule
 	\end{tabular}
-	\caption{}
+	\caption{Recognition results with the RGB SIFT}
 	\label{tab_colour}
 \end{table}
+
+% Results including discussion
+
+% Influence of RGB SIFT
+
+% Influence of parameters
+
+% Timing
 
 \end{document}
