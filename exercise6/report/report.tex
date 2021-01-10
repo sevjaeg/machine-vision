@@ -8,6 +8,7 @@
 \usepackage{gensymb}
 \usepackage{amsmath}
 \usepackage{amssymb}
+\usepackage{tensor}
 \usepackage{nicefrac}  % nicer inline fractions
 \usepackage{listings}
 \usepackage{enumerate}
@@ -16,7 +17,7 @@
 % \sisetup{}  % configure siunitx (e.g. locale = DE)
 \usepackage{verbatim}
 \usepackage{subcaption}  % captions for subplots
-\usepackage[european, siunitx]{circuitikz}  % draw circuit diagrams
+\usepackage[european, siunitx, RPvoltages]{circuitikz}  % draw circuit diagrams
 \usepackage{enumitem}
 \setlist[itemize]{label=\rule[0.5ex]{0.6ex}{0.6ex}} % nice black squares for itemize environments
 \usepackage{graphicx}
@@ -56,6 +57,342 @@
 \tableofcontents
 \pagebreak
 
+\section{Recognition Results}
+\label{results}
 
+The recognition results of the implemented pipeline are shown in Figures \ref{result0} to \ref{result9}. 
+It is apparent that the detection quality depends on the perspective of the input RGBD image. Additionally, 
+the results are not deterministic, thus they vary in case of rerunning the whole algorithm.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=11cm]{result0.PNG}
+	\caption{Recognition results for point cloud 0}
+	\label{result0}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=11cm]{result1.PNG}
+	\caption{Recognition results for point cloud 1}
+	\label{result1}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=11cm]{result2.PNG}
+	\caption{Recognition results for point cloud 2}
+	\label{result2}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=11cm]{result3.PNG}
+	\caption{Recognition results for point cloud 3}
+	\label{result3}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=11cm]{result4.PNG}
+	\caption{Recognition results for point cloud 4}
+	\label{result4}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=11cm]{result5.PNG}
+	\caption{Recognition results for point cloud 5}
+	\label{result5}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=11cm]{result6.PNG}
+	\caption{Recognition results for point cloud 6}
+	\label{result6}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=11cm]{result7.PNG}
+	\caption{Recognition results for point cloud 7}
+	\label{result7}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=11cm]{result8.PNG}
+	\caption{Recognition results for point cloud 8}
+	\label{result8}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=11cm]{result9.PNG}
+	\caption{Recognition results for point cloud 9}
+	\label{result9}
+\end{figure}
+
+
+\clearpage
+\section{Discussion of the Approach}
+In this exercise, a 3D recognition pipeline was implemented. In the following, all relevant steps are discussed. The relevant 
+code can be found in the \verb|main.py| file which is structured in the same manner as this section. However, some relevant functions
+are located in the files \verb|cluster_matching.py| and \verb|points_to_image.py|.
+
+\subsection{Ground Plane Detection}
+\label{plane_detection}
+In the beginning, the ground plane (in case of the test images this was the floor) was detected an removed. This simplifies
+the clustering steps in the following significantly, at least as long as the object are placed with a reasonable distance.
+As discussed in Exercise\,5, RANSAC was used to detect the plane, however the Open3d method \verb|segment_plane| was used instead
+of a hand-crafted approach. Figure\,\ref{ransac} shows the result of the plane detection in the point cloud.
+
+The respective code is located in the main method starting from line\,46 and offers the following parameters:
+\begin{itemize}
+	\item \verb|ransac_inlier_dist|: The maximal distance towards the estimated plane within which a point is considered as inlier.
+	The chosen value is \SI{1.5}{\cm}.
+	\item \verb|ransac_iterations|: The number of RANSAC iterations, thus the number of random samples. A value of $7000$ was used.
+\end{itemize}
+
+In the following, all points belonging to the dominant plane are removed, thus only the points belonging to the objects of
+interest and some artefacts remain.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=11cm]{ransac.PNG}
+	\caption{Detection of the ground plane with RANSAC}
+	\label{ransac}
+\end{figure}
+
+\subsection{Point Cloud to Image Conversion}
+\label{to2d}
+
+In this step, the previously described point cloud is converted into an image. Therefore, the camera geometry has to be
+considered. In homogeneous coordinates, the pixel position $p$ can be calculated from the camera coordinates $\tensor[^C]{p}{}$ as
+
+\begin{equation}
+	p =
+	\begin{pmatrix}
+		u\\
+		v\\
+		1
+	\end{pmatrix}
+	= K \tensor[^C]{p}{} = K
+	\begin{pmatrix}
+		x\\
+		y\\
+		z\\
+		1
+	\end{pmatrix}
+\end{equation}
+
+with the perspective projection matrix
+
+\begin{equation}
+	K = \begin{pmatrix}
+			f_{x, rgb} & 0 & c_{x, rgb} & 0\\ 
+			0 & f_{y, rgb} & c_{y, rgb} & 0\\ 
+			0 & 0 & 0 & 0
+		\end{pmatrix}.
+\end{equation}
+
+The resulting pixel coordinates $(u, v)$ have to be unwrapped (as they might be negative) and rounded, then the can be used
+to create the image. A possible result is shown in Figure\,\ref{2d}.
+
+The respective code can be found in the main method starting from line\,61 and in the file \verb|points_to_image.py|.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=11cm]{ground_plane_removed.PNG}
+	\caption{Image with removed ground plane}
+	\label{2d}
+\end{figure}
+
+\clearpage
+\subsection{Clustering}
+This step deals with the segmentation of the image which is achieved by the means of clustering of the point cloud from
+Section\,\ref{plane_detection}. As clustering is a computationally expensive task, the point cloud is down-sampled. This
+is done with voxels. In the following, the Open3d implementation of the DBSCAN clustering is applied to create the
+cluster labels. One resulting clustered point cloud is visualised in Figure\,\ref{clustering}.
+
+As the clustering parameters (s. below for details) that achieved the best results tends to find small clusters that belong
+to the floor (like the one in the right of Figure\,\ref{clustering}), it is necessary to remove very small clusters before
+proceeding. Therefore, simple threshold is used.
+
+The cluster encoding is achieved by the means of colouring the respective points with a colourmap.
+So the colour value is \verb|colourmap(label/max_label)|.
+
+The clustering code can be found in the main file starting from line\,66. It features the following parameters:
+
+\begin{itemize}
+	\item \verb|dbscan_eps|: The parameter \verb|eps| of the Open3d DBSCAN clustering algorithm implementation. The used value is $0.02$.
+	\item \verb|dbscan_min_points|: The parameter \verb|min_points| of the Open3d DBSCAN clustering algorithm implementation. The used value is $50$.
+	\item \verb|cluster_min_points|: Clusters with less points are removed. The used value is $300$.
+	\item \verb|voxel_size|: The voxel size for the down-sampling algorithm. The used value is $0.002$.
+\end{itemize}
+
+Unfortunately, these parameters are not able to achieve optimal clustering in all cases. As shown in Figures\,\ref{result2} and \ref{result5}, 
+the cup is segmented as two objects. This is not surprising, as from some perspectives it looks like two objects in the point cloud. This problem
+can be mitigated by increasing \verb|dbscan_eps|, however this is unsatisfactory as it leads to two distinct objects being detected as one in other
+point clouds. Thus there is still room for improved clustering approaches.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=11cm]{clustering.PNG}
+	\caption{Detected clusters in the point cloud}
+	\label{clustering}
+\end{figure}
+
+\subsection{Clusters to Image Conversion}
+
+In this step, the detected clusters are mapped to the 2D image space in order to segment the image created in Section\,\ref{to2d}.
+Again, the functions from \verb|points_to_image.py| are used. As the point cloud was down-sampled before clustering, the resulting
+image shows numerous holes (s. Figure \ref{clustering}\,(a)). To overcome this problem, a simple morphological transformation filling 
+the holes is applied. This results in images like the one displayed in Figure \ref{clustering}\,(b).
+
+The respective code is located in the main method starting at line\,113. Its only parameter is \verb|kernel_size|, which describes the size of
+the kernel used for the morphological transformation.
+
+\begin{figure}
+	\begin{subfigure}[b]{0.45\textwidth}
+		\includegraphics[width=7cm]{clusters.PNG}
+		\subcaption{}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.45\textwidth}
+		\includegraphics[width=7cm]{clusters_filled.PNG}
+		\subcaption{}
+	\end{subfigure}
+	\centering
+	
+	\caption{Clusters projected to an image before (a) and after (b) the morphological transformation}
+	\label{clustered}
+\end{figure}
+
+
+\subsection{Feature Matching}
+
+During the previously described steps, a suitable segmentation of the input image was achieved. In the following, the actual classification of the
+objects can be performed. Similar to Exercise\,3, SIFT is used for matching the features in training images to the ones in the scene. This is done in
+the following way:
+
+For each object class, there are several training point clouds. The following steps are performed for each of them. In the meantime, a data structure
+consisting of the current class estimation and the related metric $\eta$ (s. below) is kept The initially, $\eta$ is $0$.
+\begin{enumerate}
+	\item The point cloud is projected to a 2D image using the \verb|points_to_image.py| functions.
+	\item SIFT is used to calculate key points and descriptors in the training image.
+	\item The training features are matched to previously calculated SIFT features in the scene (s. Figure\,\ref{matching}).
+	\item For each cluster, the following steps are performed:
+	\begin{enumerate}
+		\item The number of matches related to key points in this cluster $n_{cluster}$ are counted.
+		\item The ratio between the matches in the cluster and the overall matches is calculated as $r = n_{cluster}/n_{total}$. This solves problems
+			  arising from different training images with different numbers of features.
+		\item In case $n_{cluster} > n_{min}$ and $r > \eta$, $\eta$ is set to $r$ and the current class hypothesis is updated.
+	\end{enumerate}
+\end{enumerate}
+
+Eventually, there is a hypothesis for each cluster. However, it is possible that no suitable cluster was found. In this case, the estimated class is
+\emph{unknown}.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=11cm]{matching.PNG}
+	\caption{Matching of training and scene features}
+	\label{matching}
+\end{figure}
+
+The respective code is in located in the main method starting at line\,132. The methods used to map the matches to a cluster are located in the 
+\verb|cluster_matching.py| file. It offers the following parameters:
+
+\begin{itemize}
+	\item \verb|sift_threshold|: Denotes the maximal distance of a match for the match to be considered. This helps by reducing the computational
+	effort by removing less relevant matches and is set to $400$.
+	\item \verb|min_matches|: The parameter $n_{min}$. At least this number of matches related to a cluster is necessary to create a new hypothesis.
+	This prevents high values of $\eta$ due to a very small number of matches. A value of $4$ is used.
+	\item \verb|considered_matches|: Specifies the number of matches for each training key point considered. A value of $3$ is used.
+	\item \verb|neighbourhood_size|: The size of the surrounding of a cluster in which a match is still considered an inlier in pixels. This
+	ensures that features at the edge of a cluster (which might lie just outside) are still considered. A value of $3$ is used.
+\end{itemize}
+
+All Figures in Section\,\ref{results} were created with this basic variant of the algorithm. However, two modifications were implemented, they
+are discussed in the following two sections.
+
+\subsubsection{Weighted match counting}
+So far, the matches related to each cluster were counted. However, similar to improved variants of RANSAC (like MSAC) it might be useful to consider 
+the actual distance $d$ of the match and use it as weight. This is done by redefining the metric $\eta$ in the following way:
+
+\begin{equation*}
+	\eta = \sum_{i = 0}^{n_{cluster}} \frac{1}{{d_i}^2}. 
+\end{equation*}
+
+Unfortunately, this hardly improves the recognition results. Nonetheless, it can be activated by setting the parameter \verb|use_distance_weights|
+in the main method.
+
+\subsubsection{RGB SIFT}
+Another approach that was used to improve the matching quality was extending the SIFT features to the RGB colour space. Thus, not only the
+grey version of the scene and the training image was used, but three images in parallel. As a result, the number of matches is drastically 
+increased. This does not only lead to an increased computational complexity, but also to better detection results. For instance, the detection
+results of point cloud\,2 (compare Figure\,\ref{result2} with \ref{rgb2}) could be improved notably.
+
+This extension can be enabled by setting the parameter \verb|use_colour_sift| in the main method.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=11cm]{rgb2.PNG}
+	\caption{Recognition results for point cloud 2 with RGB SIFT}
+	\label{rgb2}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=11cm]{rgb3.PNG}
+	\caption{Recognition results for point cloud 3 with RGB SIFT}
+	\label{rgb3}
+\end{figure}
+
+\clearpage
+\section{Evaluation}
+
+\ref{tab}
+
+\ref{tab_colour}
+
+\begin{table}
+	\centering
+	\begin{tabular}{l | c | c | c}
+	\toprule
+	Object & Correct & False negative  & False positive \\
+	\midrule
+	Book & 2 & 0 & 2 \\
+	Cookie Box & 9 & 1 & 0 \\
+	Cup & 8 & 3 & 4\\
+	Ketchup & 8 & 2 & 4 \\
+	Sugar & 10 & 0 & 3 \\
+	Sweets & 5 & 5 & 1\\
+	Tea & 6 & 4 & 1\\
+	\bottomrule
+	\end{tabular}
+	\caption{}
+	\label{tab}
+\end{table}
+
+\begin{table}
+	\centering
+	\begin{tabular}{l | c | c | c}
+	\toprule
+	Object & Correct & False negative  & False positive \\
+	\midrule
+	Book & 2 & 2 & 0 \\
+	Cookie Box & 10 & 0 & 0 \\
+	Cup & 7 & 5 & 5 \\
+	Ketchup & 8 & 2 & 2 \\
+	Sugar & 10 & 0 & 5 \\
+	Sweets & 9 & 1 & 0 \\
+	Tea & 6 & 4 & 0\\
+	\bottomrule
+	\end{tabular}
+	\caption{}
+	\label{tab_colour}
+\end{table}
 
 \end{document}

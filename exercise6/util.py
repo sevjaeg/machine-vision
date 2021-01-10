@@ -14,45 +14,13 @@ import matplotlib.pyplot as plt
 import cv2
 
 
-def plot_pcds(plane_pcds: List[o3d.geometry.PointCloud]) -> None:
-    """
-    Plot multiple point clouds in different colours
-    :param plane_pcds:
-    :return:
-    """
-    colormap = plt.cm.get_cmap("gist_rainbow", len(plane_pcds))
-    # Color the individual plane pointclouds in different colors
-    for i, plane_pcd in enumerate(plane_pcds):
-        plane_pcd.paint_uniform_color(colormap(i)[0:3])
-
-    vis = o3d.visualization.Visualizer()
-    vis.create_window()
-    for p in plane_pcds:
-        vis.add_geometry(p)
-    vc = vis.get_view_control()
-    vc.set_front([-0.0, 0.0, -1])
-    vc.set_lookat([0, -0.0, 1])
-    vc.set_up([0, -1, 0])
-    vc.set_zoom(0.5)
-    vis.run()
-    vis.destroy_window()
-
-
-# from exercise 1
 def show_image(img: np.array, title: str, save_image: bool = False, use_matplotlib: bool = False) -> None:
-    """ Plot an image with either OpenCV or Matplotlib.
+    """ Plot an image with either OpenCV or Matplotlib. Adapted from Exercise 1
 
-    :param img: :param img: Input image
-    :type img: np.array with shape (height, width) or (height, width, channels)
-
+    :param img: :param img: Input image with shape (height, width) or (height, width, channels)
     :param title: The title of the plot which is also used as a filename if save_image is chosen
-    :type title: string
-
     :param save_image: If this is set to True, an image will be saved to disc as title.png
-    :type save_image: bool
-
     :param use_matplotlib: If this is set to True, Matplotlib will be used for plotting, OpenCV otherwise
-    :type use_matplotlib: bool
     """
 
     # First check if img is color or grayscale. Raise an exception on a wrong type.
@@ -82,3 +50,25 @@ def show_image(img: np.array, title: str, save_image: bool = False, use_matplotl
     if save_image:
         cv2.imwrite(title.replace(" ", "_") + ".png", img)
 
+
+def show_pcds(plane_pcds: List[o3d.geometry.PointCloud]) -> None:
+    """
+    Plot multiple point clouds in different colours. Adapted from Exercise 5
+    :param plane_pcds: The list of point clouds to be displayed
+    """
+    # Color the individual point clouds in different colors
+    colormap = plt.cm.get_cmap("gist_rainbow", len(plane_pcds))
+    for i, plane_pcd in enumerate(plane_pcds):
+        plane_pcd.paint_uniform_color(colormap(i)[0:3])
+
+    vis = o3d.visualization.Visualizer()
+    vis.create_window()
+    for p in plane_pcds:
+        vis.add_geometry(p)
+    vc = vis.get_view_control()
+    vc.set_front([-0.0, 0.0, -1])
+    vc.set_lookat([0, -0.0, 1])
+    vc.set_up([0, -1, 0])
+    vc.set_zoom(0.5)
+    vis.run()
+    vis.destroy_window()
