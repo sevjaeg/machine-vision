@@ -61,7 +61,7 @@
 \section{Recognition Results}
 \label{results}
 
-The recognition results of the implemented pipeline are shown in Figures \ref{result0} to \ref{result9}. 
+The recognition results of the implemented pipeline are shown in Figures~\ref{result0} to \ref{result9}. 
 It is apparent that the detection quality depends on the perspective of the input RGBD image. Additionally, 
 the results are not deterministic, thus they vary in case of rerunning the whole algorithm.
 
@@ -146,8 +146,8 @@ are located in the files \verb|cluster_matching.py| and \verb|points_to_image.py
 \label{plane_detection}
 In the beginning, the ground plane (in case of the test images this was the floor) was detected an removed. This simplifies
 the clustering steps in the following significantly, at least as long as the object are placed with a reasonable distance.
-As discussed in Exercise\,5, RANSAC was used to detect the plane, however the Open3d method \verb|segment_plane| was used instead
-of a hand-crafted approach. Figure\,\ref{ransac} shows the result of the plane detection in the point cloud.
+As discussed in Exercise~5, RANSAC was used to detect the plane, however the Open3d method \verb|segment_plane| was used instead
+of a hand-crafted approach. Figure~\ref{ransac} shows the result of the plane detection in the point cloud.
 
 The respective code is located in the main method starting from line\,46 and offers the following parameters:
 \begin{itemize}
@@ -199,9 +199,9 @@ with the perspective projection matrix
 \end{equation}
 
 The resulting pixel coordinates $(u, v)$ have to be unwrapped (as they might be negative) and rounded, then the can be used
-to create the image. A possible result is shown in Figure\,\ref{2d}.
+to create the image. A possible result is shown in Figure~\ref{2d}.
 
-The respective code can be found in the main method starting from line\,61 and in the file \verb|points_to_image.py|.
+The respective code can be found in the main method starting from line~61 and in the file \verb|points_to_image.py|.
 
 \begin{figure}
 	\centering
@@ -215,16 +215,16 @@ The respective code can be found in the main method starting from line\,61 and i
 This step deals with the segmentation of the image which is achieved by the means of clustering of the point cloud from
 Section\,\ref{plane_detection}. As clustering is a computationally expensive task, the point cloud is down-sampled. This
 is done with voxels. In the following, the Open3d implementation of the DBSCAN clustering is applied to create the
-cluster labels. One resulting clustered point cloud is visualised in Figure\,\ref{clustering}.
+cluster labels. One resulting clustered point cloud is visualised in Figure~\ref{clustering}.
 
 As the clustering parameters (s. below for details) that achieved the best results tends to find small clusters that belong
-to the floor (like the one in the right of Figure\,\ref{clustering}), it is necessary to remove very small clusters before
+to the floor (like the one in the right of Figure~\ref{clustering}), it is necessary to remove very small clusters before
 proceeding. Therefore, simple threshold is used.
 
 The cluster encoding is achieved by the means of colouring the respective points with a colourmap.
 So the colour value is \verb|colourmap(label/max_label)|.
 
-The clustering code can be found in the main file starting from line\,66. It features the following parameters:
+The clustering code can be found in the main file starting from line~66. It features the following parameters:
 
 \begin{itemize}
 	\item \verb|dbscan_eps|: The parameter \verb|eps| of the Open3d DBSCAN clustering algorithm implementation. The used value is $0.02$.
@@ -233,7 +233,7 @@ The clustering code can be found in the main file starting from line\,66. It fea
 	\item \verb|voxel_size|: The voxel size for the down-sampling algorithm. The used value is $0.002$.
 \end{itemize}
 
-Unfortunately, these parameters are not able to achieve optimal clustering in all cases. As shown in Figures\,\ref{result2} and \ref{result5}, 
+Unfortunately, these parameters are not able to achieve optimal clustering in all cases. As shown in Figures~\ref{result2} and \ref{result5}, 
 the cup is segmented as two objects. This is not surprising, as from some perspectives it looks like two objects in the point cloud. This problem
 can be mitigated by increasing \verb|dbscan_eps|, however this is unsatisfactory as it leads to two distinct objects being detected as one in other
 point clouds. Thus there is still room for improved clustering approaches.
@@ -247,10 +247,10 @@ point clouds. Thus there is still room for improved clustering approaches.
 
 \subsection{Clusters to Image Conversion}
 
-In this step, the detected clusters are mapped to the 2D image space in order to segment the image created in Section\,\ref{to2d}.
+In this step, the detected clusters are mapped to the 2D image space in order to segment the image created in Section~\ref{to2d}.
 Again, the functions from \verb|points_to_image.py| are used. As the point cloud was down-sampled before clustering, the resulting
-image shows numerous holes (s. Figure \ref{clustering}\,(a)). To overcome this problem, a simple morphological transformation filling 
-the holes is applied. This results in images like the one displayed in Figure \ref{clustering}\,(b).
+image shows numerous holes (s. Figure~\ref{clustering}\,(a)). To overcome this problem, a simple morphological transformation filling 
+the holes is applied. This results in images like the one displayed in Figure~\ref{clustering}\,(b).
 
 The respective code is located in the main method starting at line\,113. Its only parameter is \verb|kernel_size|, which describes the size of
 the kernel used for the morphological transformation.
@@ -274,7 +274,7 @@ the kernel used for the morphological transformation.
 \subsection{Feature Matching}
 
 During the previously described steps, a suitable segmentation of the input image was achieved. In the following, the actual classification of the
-objects can be performed. Similar to Exercise\,3, SIFT is used for matching the features in training images to the ones in the scene. This is done in
+objects can be performed. Similar to Exercise~3, SIFT is used for matching the features in training images to the ones in the scene. This is done in
 the following way:
 
 For each object class, there are several training point clouds. The following steps are performed for each of them. In the meantime, a data structure
@@ -302,7 +302,7 @@ Eventually, there is a hypothesis for each cluster. However, it is possible that
 	\label{matching}
 \end{figure}
 
-The respective code is in located in the main method starting at line\,132. The methods used to map the matches to a cluster are located in the 
+The respective code is in located in the main method starting at line~132. The methods used to map the matches to a cluster are located in the 
 \verb|cluster_matching.py| file. It offers the following parameters:
 
 \begin{itemize}
@@ -315,10 +315,10 @@ The respective code is in located in the main method starting at line\,132. The 
 	ensures that features at the edge of a cluster (which might lie just outside) are still considered. A value of $3$ is used.
 \end{itemize}
 
-All Figures in Section\,\ref{results} were created with this basic variant of the algorithm. However, two modifications were implemented, they
+All Figures in Section~\ref{results} were created with this basic variant of the algorithm. However, two modifications were implemented, they
 are discussed in the following two sections.
 
-\subsubsection{Weighted match counting}
+\subsubsection{Weighted match counting} \label{sec:weighted}
 So far, the matches related to each cluster were counted. However, similar to improved variants of RANSAC (like MSAC) it might be useful to consider 
 the actual distance $d$ of the match and use it as weight. This is done by redefining the metric $\eta$ in the following way:
 
@@ -329,11 +329,11 @@ the actual distance $d$ of the match and use it as weight. This is done by redef
 Unfortunately, this hardly improves the recognition results. Nonetheless, it can be activated by setting the parameter \verb|use_distance_weights|
 in the main method.
 
-\subsubsection{RGB SIFT}
+\subsubsection{RGB SIFT} \label{sec:rgb_sift}
 Another approach that was used to improve the matching quality was extending the SIFT features to the RGB colour space. Thus, not only the
 grey version of the scene and the training image was used, but three images in parallel. As a result, the number of matches is drastically 
 increased. This does not only lead to an increased computational complexity, but also to better detection results. For instance, the detection
-results of point cloud\,2 (compare Figure\,\ref{result2} with \ref{rgb2}) could be improved notably.
+results of point cloud\,2 (compare Figure~\ref{result2} with \ref{rgb2}) could be improved notably.
 
 This extension can be enabled by setting the parameter \verb|use_colour_sift| in the main method.
 
@@ -346,10 +346,6 @@ This extension can be enabled by setting the parameter \verb|use_colour_sift| in
 
 \clearpage
 \section{Evaluation}
-
-\ref{tab}
-
-\ref{tab_colour}
 
 \begin{table}
 	\centering
@@ -380,25 +376,77 @@ This extension can be enabled by setting the parameter \verb|use_colour_sift| in
 	\midrule
 	Book & 2 & 0 & 0 \\
 	Cookie Box & 10 & 0 & 0 \\
-	Cup & 7 & 5 & 5 \\
+	Cup & 8 & 4 & 5 \\
 	Ketchup & 8 & 2 & 2 \\
 	Sugar & 10 & 0 & 5 \\
 	Sweets & 9 & 1 & 0 \\
 	Tea & 6 & 4 & 0\\
 	\midrule
-	Total & 52 & 12 & 12\\
+	Total & 53 & 11 & 12\\
 	\bottomrule
 	\end{tabular}
 	\caption{Recognition results with the RGB SIFT}
 	\label{tab_colour}
 \end{table}
 
-% Results including discussion
+An overview of the recognition results of the basic pipeline is given in Table~\ref{tab}. The algorithm is able to classify certain objects (like
+the cookie box or sugar) very well, while struggling with others (like sweets of tea). Reasons for this behaviour might be the texture of the objects.
+For instance, the cookie box or the book offer clear textures, which can rather easily be distinguished from others. In contrast, the textures of tea,
+ketchup or sweets are rather fuzzy. Nonetheless, the cup can be detected rather well, despite not showing and distinctive texture at all.
 
-% Influence of RGB SIFT
+As the weighted match counting approach as described in Section~\ref{sec:weighted} did not change the recognition performance beyond the deviation 
+between consecutive attempts of the same approach, it was considered unsuccessful and therefore not treated in detail in this report.
 
-% Influence of parameters
 
-% Timing
+The RGB SIFT approach (as described in Section~\ref{sec:rgb_sift}) turned out to be a helpful extension. As shown in Table~\ref{tab_colour}, it
+increases the recognition accuracy from \SI{77.5}{\percent} to \SI{85.5}{\percent}. In particular, the detection of sweets was drastically improved.
+With the basic pipeline, they were frequently classified as ketchup, due to the additional colour information this does not happen any longer. However,
+the recognition system still suffers from notable problems in distinguishing a cup from sugar. This might be due to the similar colour of the objects
+and the fact that both do not offer a lot of texture.
+
+
+The runtimes of the individual steps of the pipeline (both the basic and the RGB SIFT) can be found in Table~\ref{tab_time}. It becomes apparent, 
+that the RANSAC and the final Classification step are the most time-consuming ones. While the runtime of RANSAC only depends on the number of points
+and the desired accuracy, the classification step takes longer as the number of object classes and thus training images increases. Furthermore,
+the effort of the classification step significantly increases as the RGB SIFT approach is used. Some details are depicted in Table~\ref{tab_time_details}.
+As expected, the runtime for the SIFT interest point detection and descriptor calculation is notably increased. As this happens in a loop over all 
+training images, the overall runtime of the classification step deteriorates.
+
+\begin{table}
+	\centering
+	\begin{tabular}{l | c | c}
+		\toprule
+		Task & Runtime (standard) [ms] & Runtime (RGB SIFT) [ms] \\
+		\midrule
+		RANSAC & 4606 & 4634  \\
+		2D Projection (Image) & 11 & 11 \\
+		Clustering & 181 & 186 \\
+		2D Projection (Clusters) & 32 & 36 \\
+		Cluster Classification & 12378 & 29959 \\
+		\midrule
+		Overall & 17180 & 34862 \\
+		\bottomrule
+	\end{tabular}
+	\caption{Timing of the individual pipeline stages}
+	\label{tab_time}
+\end{table}
+
+
+\begin{table}
+	\centering
+	\begin{tabular}{l | c | c}
+		\toprule
+		Task (per training image) & Runtime (standard) [ms] & Runtime (RGB SIFT) [ms] \\
+		\midrule
+		SIFT Scene & 42 & 146 \\
+		SIFT Training & 38 & 55 \\
+		Feature Matching & 3 & 6 \\
+		Classification & 208 & 437 \\
+		\bottomrule
+	\end{tabular}
+	\caption{Timing of the steps of the classification stage}
+	\label{tab_time_details}
+\end{table}
+	
 
 \end{document}

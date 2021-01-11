@@ -21,7 +21,7 @@ from points_to_image import *
 from cluster_matching import *
 
 debug = False
-input_image = "9"
+input_image = "0"
 
 categories = {
         0: 'unknown',
