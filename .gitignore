@@ -571,3 +571,7 @@ TSWLatexianTemp*
 # Uncomment the next line to have this generated file ignored.
 #*Notes.bib
 *.dict
+
+
+# exercise 4 task description
+exercise4/mvcr_exercise4.ipynb
